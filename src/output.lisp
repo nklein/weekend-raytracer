@@ -123,10 +123,10 @@
                             :width width
                             :height height)))
     (labels ((clamp (n)
-               (let ((v (round (* 255.0d0 n))))
+               (let ((v (round (* #.(color-component 255) n))))
                  (cond
-                   ((< v 0) 0)
-                   ((< 255 v) 255)
+                   ((< v 0) #.(color-component 0))
+                   ((< 255 v) #.(color-component 255))
                    (t v))))
              (resize-pixel (pixel)
                (let ((len (length pixel)))
@@ -205,8 +205,9 @@ The default value is taken from the *VERBOSE* special variable."
          (cutoff (or cutoff
                      (ceiling (length permutation) 2)))
          (output-color-dimensions (length border-color))
-         (border-color (or border-color
-                           (loop :repeat color-dimensions :collecting 0))))
+         (border-color (mapcar #'color-component
+                               (or border-color
+                                   (loop :repeat color-dimensions :collecting 0)))))
     (check-type border-width (integer 0))
     (assert (%valid-permutation-p permutation (length dimensions)) (permutation)
             "Permutation ~A does not word for dimensions ~D"

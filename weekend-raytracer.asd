@@ -12,7 +12,11 @@
    (:static-file "UNLICENSE.txt")
    (:module "src"
     :components ((:file "package")
-                 (:file "output" :depends-on ("package"))))))
+                 (:file "types" :depends-on ("package"))
+                 (:file "vector" :depends-on ("package"
+                                              "types"))
+                 (:file "output" :depends-on ("package"
+                                              "types"))))))
 
 (asdf:defsystem #:weekend-raytracer/examples
   :description "Examples for the WEEKEND-RAYTRACER package."
@@ -41,5 +45,6 @@
    (:static-file "UNLICENSE.txt")
    (:module "test"
     :components ((:file "package")
+                 (:file "vector" :depends-on ("package"))
                  (:file "output" :depends-on ("package"))
                  (:file "run" :depends-on ("package"))))))

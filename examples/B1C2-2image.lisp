@@ -17,16 +17,15 @@ it."
          (height 256)
          (depth 5)
          (color-dimensions 3)
-         (element-type 'double-float)
          (img (make-array (list width height depth color-dimensions)
-                          :element-type element-type
-                          :initial-element (coerce 0 element-type))))
+                          :element-type 'color-component-type
+                          :initial-element (color-component 0))))
     (loop :for z :below depth
-          :for blue := (coerce (/ z (1- depth)) element-type)
+          :for blue := (color-component (/ z (1- depth)))
           :do (loop :for y :below height
-                    :for green := (coerce (/ y (1- height)) element-type)
+                    :for green := (color-component (/ y (1- height)))
                     :do (loop :for x :below width
-                              :for red := (coerce (/ x (1- width)) element-type)
+                              :for red := (color-component (/ x (1- width)))
                               :do (setf (aref img x y z 0) red
                                         (aref img x y z 1) green
                                         (aref img x y z 2) blue))))
