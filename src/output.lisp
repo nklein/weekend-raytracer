@@ -64,6 +64,7 @@
                                height
                                border-width
                                border-color
+                               verbose
                                output-pixel-fn)
   (multiple-value-bind (widths heights) (%collect-width-and-height-components dimensions permutation cutoff)
     (let ((pixel-indexes (mapcar (constantly 0) (list* 1 dimensions))))
@@ -81,6 +82,10 @@
         (loop :with ys := (mapcar (constantly 0) heights)
               :for y :below height
               :for border-row-p := (%border-p ys heights)
+              :do (when verbose
+                    (format *debug-io* "Scanline ~D of ~D~C" (1+ y) height #\Return))
+              :finally (when verbose
+                         (format *debug-io* "Done====================================~%"))
               :do (unless border-row-p
                     (map-indexes ys (length widths)))
               :do (unwind-protect
@@ -107,7 +112,8 @@
                            width
                            height
                            border-width
-                           border-color)
+                           border-color
+                           verbose)
   (let ((png (make-instance 'zpng:pixel-streamed-png
                             :color-type (ecase output-color-dimensions
                                           (1 :grayscale)
@@ -150,15 +156,20 @@
                              :height height
                              :border-width border-width
                              :border-color border-color
+                             :verbose verbose
                              :output-pixel-fn #'output-pixel)
           (zpng:finish-png png))))))
+
+(defvar *verbose* nil
+  "The default value for the VERBOSE flag to #'WRITE-IMAGE.")
 
 (defun write-image (filename array
                     &key
                       (border-width 1)
                       (border-color nil)
                       (permutation nil)
-                      (cutoff nil))
+                      (cutoff nil)
+                      (verbose *verbose*))
   "This function takes a FILENAME in which to write the image and an
 ARRAY of image pixel values.  The array can be any number of
 dimensions. The final dimension must either by 1, 2, 3, or 4 however.
@@ -182,7 +193,10 @@ before output. To leave the image cube in the order it is, one can
 leave this NIL or set it to (0 1 2 3 ...). The first CUTOFF permuted
 indices contribute to the width of the output image while the
 remaining pemuted indices contribute to teh height of the output
-image."
+image.
+
+If VERBOSE is non-NIL, the writing will output progress information.
+The default value is taken from the *VERBOSE* special variable."
   (let* ((dimensions (array-dimensions array))
          (color-dimensions (first (last dimensions)))
          (dimensions (butlast dimensions))
@@ -216,4 +230,5 @@ image."
                         :width width
                         :height height
                         :border-width border-width
-                        :border-color border-color))))
+                        :border-color border-color
+                        :verbose verbose))))
