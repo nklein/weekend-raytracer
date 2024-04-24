@@ -22,11 +22,11 @@ it."
                           :element-type element-type
                           :initial-element (coerce 0 element-type))))
     (loop :for z :below depth
-          :for blue := (coerce (/ z depth) element-type)
+          :for blue := (coerce (/ z (1- depth)) element-type)
           :do (loop :for y :below height
-                    :for green := (coerce (/ y height) element-type)
+                    :for green := (coerce (/ y (1- height)) element-type)
                     :do (loop :for x :below width
-                              :for red := (coerce (/ x width) element-type)
+                              :for red := (coerce (/ x (1- width)) element-type)
                               :do (setf (aref img x y z 0) red
                                         (aref img x y z 1) green
                                         (aref img x y z 2) blue))))
