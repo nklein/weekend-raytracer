@@ -31,10 +31,10 @@ it."
                                         (aref img x y z 2) blue))))
     (write-image #P"B1C2-2image" img
                  :border-width 2
-                 :border-color '(0 0 0 0)
+                 :border-color (vector 0 0 0 0)
                  :permutation (if verticalp
-                                  '(0 1 2)
-                                  '(0 2 1))
+                                  (vector 0 1 2)
+                                  (vector 0 2 1))
                  :cutoff (if verticalp
                              1
                              2))))

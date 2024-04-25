@@ -9,6 +9,12 @@
   (nst:def-test construct-a-4d-vector (:true)
     (vec 1 2 3 4))
 
+  (nst:def-test constructor-returns-a-vec (:true)
+    (typep (vec 1 2 3) 'vec))
+
+  (nst:def-test constructor-satisfies-vecp (:true)
+    (vecp (vec 1 2 3)))
+
   (nst:def-test constructor-upgrades-types (:true)
     (typep (vref (vec 1) 0) 'vector-component-type)))
 

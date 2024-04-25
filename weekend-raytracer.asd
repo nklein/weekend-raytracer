@@ -4,26 +4,34 @@
   :description "WEEKEND-RAYTRACER is another n-dimensional raytracer."
   :author "Patrick Stein <pat@nklein.com>"
   :license "UNLICENSE"
-  :version "0.1.20240424"
-  :depends-on (#:zpng)
+  :version "0.1.20240425"
+  :depends-on (#:policy-cond #:zpng)
   :in-order-to ((asdf:test-op (asdf:test-op :weekend-raytracer/test)))
   :components
   ((:static-file "README.md")
    (:static-file "UNLICENSE.txt")
    (:module "src"
     :components ((:file "package")
-                 (:file "types" :depends-on ("package"))
+                 (:file "compile" :depends-on ("package"))
+                 (:file "types" :depends-on ("package"
+                                             "compile"))
                  (:file "vector" :depends-on ("package"
+                                              "compile"
                                               "types"))
+                 (:file "ray" :depends-on ("package"
+                                           "compile"
+                                           "types"
+                                           "vector"))
                  (:file "output" :depends-on ("package"
+                                              "compile"
                                               "types"))))))
 
 (asdf:defsystem #:weekend-raytracer/examples
   :description "Examples for the WEEKEND-RAYTRACER package."
   :author "Patrick Stein <pat@nklein.com>"
   :license "UNLICENSE"
-  :version "0.1.20240424"
-  :depends-on ((:version #:weekend-raytracer "0.1.20240424"))
+  :version "0.1.20240425"
+  :depends-on ((:version #:weekend-raytracer "0.1.20240425"))
   :in-order-to ((asdf:test-op (asdf:test-op :weekend-raytracer/test)))
   :components
   ((:static-file "README.md")
@@ -36,8 +44,8 @@
   :description "Tests for the WEEKEND-RAYTRACER package."
   :author "Patrick Stein <pat@nklein.com>"
   :license "UNLICENSE"
-  :version "0.1.20240424"
-  :depends-on ((:version #:weekend-raytracer "0.1.20240424") #:nst)
+  :version "0.1.20240425"
+  :depends-on ((:version #:weekend-raytracer "0.1.20240425") #:nst)
   :perform (asdf:test-op (o c)
                          (uiop:symbol-call :weekend-raytracer/test :run-all-tests))
   :components
@@ -46,5 +54,6 @@
    (:module "test"
     :components ((:file "package")
                  (:file "vector" :depends-on ("package"))
+                 (:file "ray" :depends-on ("package"))
                  (:file "output" :depends-on ("package"))
                  (:file "run" :depends-on ("package"))))))
