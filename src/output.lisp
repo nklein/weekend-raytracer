@@ -116,8 +116,6 @@
        (type fixnum cutoff width height border-width)
        (type list border-color)
        (type boolean verbose)
-       #-(or :ccl)
-       (type (function (sequence) t) output-pixel-fn)
        (assertion (%valid-permutation-p permutation (length dimensions))))
     (multiple-value-bind (widths heights) (%collect-width-and-height-components dimensions permutation cutoff)
       (let ((pixel-indexes (mapcar (constantly 0) (list* 1 (coerce dimensions 'list)))))
