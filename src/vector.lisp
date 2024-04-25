@@ -51,20 +51,20 @@
     (map 'vec #'- a b)))
 
 (declaim (inline v*)
-         (type (function (vec vector-component-type) vec) v*))
+         (type (function (vec real) vec) v*))
 (defun v* (vec scalar)
   (with-policy-expectations
       ((type vec vec)
-       (type vector-component-type scalar)
+       (type real scalar)
        (returns vec))
     (map 'vec (lambda (x) (* x scalar)) vec)))
 
 (declaim (inline v/)
-         (type (function (vec vector-component-type) vec) v/))
+         (type (function (vec real) vec) v/))
 (defun v/ (vec scalar)
   (with-policy-expectations
       ((type vec vec)
-       (type vector-component-type scalar)
+       (type real scalar)
        (returns vec))
     (map 'vec (lambda (x) (/ x scalar)) vec)))
 
@@ -84,6 +84,14 @@
       ((type vec vec)
        (returns vector-component-type))
     (vector-component (sqrt (vlen^2 vec)))))
+
+(declaim (inline unit-vector)
+         (type (function (vec) vec) unit-vector))
+(defun unit-vector (vec)
+  (with-policy-expectations
+      ((type vec vec)
+       (returns vec))
+    (v/ vec (vlen vec))))
 
 (declaim (inline v.)
          (type (function (vec vec) vector-component-type) v.))

@@ -194,8 +194,8 @@
         (labels ((clamp (n)
                    (let ((v (round (* #.(color-component 255) n))))
                      (cond
-                       ((< v 0) #.(color-component 0))
-                       ((< 255 v) #.(color-component 255))
+                       ((< v 0) 0)
+                       ((< 255 v) 255)
                        (t v))))
                  (resize-pixel (pixel)
                    (let ((len (length pixel)))

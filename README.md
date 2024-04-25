@@ -24,3 +24,20 @@ The image here is a 3-D image cube rendered as horizontal slices of
 constant blueness (or as vertical slices of constant blueness if
 `VERTICALP` is non-`NIL`). The first slice is identical to the
 book image.
+
+### 1.2.2: Book 1, Chapter 4, Section 2: Creating an Image File
+
+The book image here renders an interpolation between blue and
+white. This image renders between blue and white but also between
+orange and the color the book would render.
+
+![Image cube](./images/B1C4-2image.png)
+
+You can output an image akin to Book 1, Chapter 4, Section 2's image
+with the following function:
+
+    (weekend-raytracer/examples:b1c4-2image &optional verticalp)
+
+The image here is a 3-D image cube rendered as horizontal slices.
+The color of each pixel is based on the 3rd and 4th coordinates
+of the camera ray's direction.

@@ -22,6 +22,9 @@
                                            "compile"
                                            "types"
                                            "vector"))
+                 (:file "color" :depends-on ("package"
+                                             "compile"
+                                             "types"))
                  (:file "output" :depends-on ("package"
                                               "compile"
                                               "types"))))))
@@ -38,7 +41,8 @@
    (:static-file "UNLICENSE.txt")
    (:module "examples"
     :components ((:file "package")
-                 (:file "B1C2-2image" :depends-on ("package"))))))
+                 (:file "B1C2-2image" :depends-on ("package"))
+                 (:file "B1C4-2image" :depends-on ("package"))))))
 
 (asdf:defsystem #:weekend-raytracer/test
   :description "Tests for the WEEKEND-RAYTRACER package."
@@ -55,5 +59,6 @@
     :components ((:file "package")
                  (:file "vector" :depends-on ("package"))
                  (:file "ray" :depends-on ("package"))
+                 (:file "color" :depends-on ("package"))
                  (:file "output" :depends-on ("package"))
                  (:file "run" :depends-on ("package"))))))
