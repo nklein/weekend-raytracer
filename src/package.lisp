@@ -26,6 +26,13 @@
            #:direction
            #:at
            #:with-ray)
+  (:export #:hit
+           #:tt
+           #:point
+           #:normal
+           #:full-hit
+           #:partial-hit
+           #:to-full-hit)
   (:export #:sphere
            #:center
            #:radius

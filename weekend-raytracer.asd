@@ -25,11 +25,18 @@
                  (:file "color" :depends-on ("package"
                                              "compile"
                                              "types"))
+                 (:file "hit" :depends-on ("package"
+                                           "compile"
+                                           "types"
+                                           "vector"
+                                           "color"
+                                           "ray"))
                  (:file "sphere" :depends-on ("package"
                                               "compile"
                                               "types"
                                               "vector"
-                                              "color"))
+                                              "color"
+                                              "hit"))
                  (:file "output" :depends-on ("package"
                                               "compile"
                                               "types"))))))
@@ -67,6 +74,7 @@
                  (:file "vector" :depends-on ("package"))
                  (:file "ray" :depends-on ("package"))
                  (:file "color" :depends-on ("package"))
+                 (:file "hit" :depends-on ("package"))
                  (:file "sphere" :depends-on ("package"))
                  (:file "output" :depends-on ("package"))
                  (:file "run" :depends-on ("package"))))))

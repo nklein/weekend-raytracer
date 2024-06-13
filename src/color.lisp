@@ -5,7 +5,7 @@
 (set-optimization-level)
 
 (defstruct (color (:conc-name %color-)
-                (:constructor %make-color (vals)))
+                  (:constructor %make-color (vals)))
   (vals (error "Must specify VALS") :type (simple-array color-component-type 1) :read-only t))
 
 (defmethod make-load-form ((object color) &optional environment)

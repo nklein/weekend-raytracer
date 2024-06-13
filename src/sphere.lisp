@@ -63,3 +63,34 @@
              (,radius (radius ,ss))
              (,radius^2 (radius^2 ,ss)))
          ,@body))))
+
+(defmethod hit ((obj sphere) (ray ray) tmin tmax)
+  (with-policy-expectations
+      ((type sphere obj)
+       (type ray ray)
+       (type real tmin tmax)
+       (returns (or null partial-hit)))
+    (with-sphere (center radius radius^2) obj
+      (with-ray (origin direction) ray
+        (let ((oc (v- center origin)))
+          (let ((a (vlen^2 direction))
+                (h (v. direction oc))
+                (c (- (vlen^2 oc)
+                      radius^2)))
+            (let ((d (- (* h h)
+                        (* a c))))
+              (unless (minusp d)
+                (let ((sqrtd (the vector-component-type (sqrt d)))
+                      (tmin (vector-component tmin))
+                      (tmax (vector-component tmax)))
+                  (flet ((for-root (tt)
+                           (when (<= tmin tt tmax)
+                             (flet ((thunk ()
+                                      (let ((point (at ray tt)))
+                                        (full-hit tt
+                                                  point
+                                                  (v/ (v- point center)
+                                                      radius)))))
+                               (partial-hit tt #'thunk)))))
+                    (or (for-root (/ (- h sqrtd) a))
+                        (for-root (/ (+ h sqrtd) a)))))))))))))
