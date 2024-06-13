@@ -4,15 +4,32 @@
 
 (set-optimization-level)
 
-(deftype vec () 'vector)
+(defstruct (vec (:conc-name %vec-)
+                (:constructor %make-vec (vals)))
+  (vals (error "Must specify VALS") :type (simple-array vector-component-type 1)))
+
+(defmethod make-load-form ((object vec) &optional environment)
+  (declare (ignore environment))
+  `(vec ,@(map 'list #'identity (%vec-vals object))))
+
+(declaim (inline %vec)
+         (type (function (list) vec) b))
+(defun %vec (vals)
+  (with-policy-expectations
+      ((type list vals)
+       (assertion (every #'realp vals))
+       (returns vec))
+    (%make-vec (make-array (list (length vals))
+                           :element-type 'vector-component-type
+                           :initial-contents (mapcar #'vector-component vals)))))
 
 (declaim (inline vec)
          (type (function (&rest real) vec)))
-(defun vec (&rest values)
+(defun vec (&rest vals)
   (with-policy-expectations
-      ((assertion (every #'realp values))
+      ((assertion (every #'realp vals))
        (returns vec))
-    (map 'vec #'vector-component values)))
+    (%vec vals)))
 
 (declaim (inline vecp)
          (type (function (t) boolean) vecp))
@@ -28,45 +45,106 @@
       ((type vec vec)
        (type fixnum index)
        (returns vector-component-type))
-    (svref vec index)))
+    (aref (%vec-vals vec) index)))
+
+(declaim (inline vsize)
+         (type (function (vec) (integer 0 #.(1- array-dimension-limit)))))
+(defun vsize (v)
+  (with-policy-expectations
+      ((type vec v)
+       (returns (integer 0 #.(1- array-dimension-limit))))
+    (array-dimension (%vec-vals v) 0)))
+
+(defmacro element-wise2 (fn a b)
+  (let ((ff (gensym "FF-"))
+        (aa (gensym "AA-"))
+        (bb (gensym "BB-"))
+        (av (gensym "AV-"))
+        (bv (gensym "BV-"))
+        (cv (gensym "CV-"))
+        (ii (gensym "I-")))
+    `(let ((,ff ,fn)
+           (,aa ,a)
+           (,bb ,b))
+       (with-policy-expectations
+           ((type vec ,aa)
+            (type vec ,bb)
+            (returns vec))
+         (let* ((,av (%vec-vals ,aa))
+                (,bv (%vec-vals ,bb))
+                (,cv (make-array (list (vsize ,aa))
+                                 :element-type 'vector-component-type
+                                 :initial-element (vector-component 0))))
+           (loop :for ,ii :below (vsize ,aa)
+                 :do (setf (aref ,cv ,ii)
+                           (funcall ,ff (aref ,av ,ii) (aref ,bv ,ii))))
+           (%make-vec ,cv))))))
+
+(defmacro element-wise1 (fn a)
+  (let ((ff (gensym "FF-"))
+        (aa (gensym "AA-"))
+        (av (gensym "AV-"))
+        (cv (gensym "CV-"))
+        (ii (gensym "I-")))
+    `(let ((,ff ,fn)
+           (,aa ,a))
+       (with-policy-expectations
+           ((type vec ,aa)
+            (returns vec))
+         (let* ((,av (%vec-vals ,aa))
+                (,cv (make-array (list (vsize ,aa))
+                                 :element-type 'vector-component-type
+                                 :initial-element (vector-component 0))))
+           (loop :for ,ii :below (vsize ,aa)
+                 :do (setf (aref ,cv ,ii)
+                           (funcall ,ff (aref ,av ,ii))))
+           (%make-vec ,cv))))))
+
+(defmacro element-wise (fn a &optional (b nil b-p))
+  (if b-p
+      `(element-wise2 ,fn ,a ,b)
+      `(element-wise1 ,fn ,a)))
 
 (declaim (inline v+)
          (type (function (vec vec) vec) v+))
 (defun v+ (a b)
-  (with-policy-expectations
-      ((type vec a)
-       (type vec b)
-       (assertion (= (length a) (length b)))
-       (returns vec))
-    (map 'vec #'+ a b)))
+  (element-wise #'+ a b))
+
+#+(or)
+(let ((a (vec 1 2 3 4 5 6 7 8 9 10))
+      (b (vec 1 2 3 4 5 6 7 8 9 10)))
+  (time (loop :repeat 1000000
+              :do (v+ a b))))
 
 (declaim (inline v-)
          (type (function (vec vec) vec) v-))
 (defun v- (a b)
-  (with-policy-expectations
-      ((type vec a)
-       (type vec b)
-       (assertion (= (length a) (length b)))
-       (returns vec))
-    (map 'vec #'- a b)))
+  (element-wise #'- a b))
+
+(declaim (inline v*v)
+         (type (function (vec vec) vec) v*v))
+(defun v*v (a b)
+  (element-wise #'* a b))
 
 (declaim (inline v*)
          (type (function (vec real) vec) v*))
 (defun v* (vec scalar)
   (with-policy-expectations
-      ((type vec vec)
-       (type real scalar)
-       (returns vec))
-    (map 'vec (lambda (x) (* x scalar)) vec)))
+      ((type real scalar))
+    (let ((ss (vector-component scalar)))
+      (element-wise
+          (lambda (x)
+            (declare (type vector-component-type x))
+            (* x ss))
+          vec))))
 
 (declaim (inline v/)
          (type (function (vec real) vec) v/))
 (defun v/ (vec scalar)
   (with-policy-expectations
-      ((type vec vec)
-       (type real scalar)
-       (returns vec))
-    (map 'vec (lambda (x) (/ x scalar)) vec)))
+      ((type real scalar)
+       (assertion (not (zerop scalar))))
+    (element-wise (lambda (x) (/ x scalar)) vec)))
 
 (declaim (inline vlen^2)
          (type (function (vec) vector-component-type) vlen^2))
@@ -74,8 +152,10 @@
   (with-policy-expectations
       ((type vec vec)
        (returns vector-component-type))
-    (reduce #'+ vec :key (lambda (x)
-                           (* x x)))))
+    (reduce #'+ (%vec-vals vec)
+            :key (lambda (x)
+                   (declare (type vector-component-type x))
+                   (* x x)))))
 
 (declaim (inline vlen)
          (type (function (vec) vector-component-type) vlen))
@@ -83,7 +163,7 @@
   (with-policy-expectations
       ((type vec vec)
        (returns vector-component-type))
-    (vector-component (sqrt (vlen^2 vec)))))
+    (the vector-component-type (sqrt (vlen^2 vec)))))
 
 (declaim (inline unit-vector)
          (type (function (vec) vec) unit-vector))
@@ -99,6 +179,22 @@
   (with-policy-expectations
       ((type vec a)
        (type vec b)
-       (assertion (= (length a) (length b)))
+       (assertion (= (vsize a) (vsize b)))
        (returns vector-component-type))
-    (reduce #'+ (map 'list #'* a b))))
+    (let ((av (%vec-vals a))
+          (bv (%vec-vals b)))
+      (loop :for ii :below (vsize a)
+            :summing (* (aref av ii) (aref bv ii)) :of-type vector-component-type))))
+
+(defmacro mapv (fn &rest vs)
+  (let ((func (gensym "FUNC-"))
+        (vecs (gensym "VECS-")))
+    `(let ((,func ,fn)
+           (,vecs (list ,@vs)))
+       (with-policy-expectations
+           ((type function ,func)
+            (assertion (every #'vecp ,vecs))))
+       (apply #'map
+              'list
+              ,func
+              (mapcar #'%vec-vals ,vecs)))))

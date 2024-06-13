@@ -20,24 +20,24 @@
 
 (nst:def-test-group vector-math-tests ()
   (nst:def-test v+-test (:equalp '(2 5))
-    (map 'list #'round
-         (v+ (vec 1 2)
-             (vec 1 3))))
+    (mapv #'round
+          (v+ (vec 1 2)
+              (vec 1 3))))
 
   (nst:def-test v--test (:equalp '(2 5))
-    (map 'list #'round
-         (v- (vec 3 8)
-             (vec 1 3))))
+    (mapv #'round
+          (v- (vec 3 8)
+              (vec 1 3))))
 
   (nst:def-test v*-test (:equalp '(2 4))
-    (map 'list #'round
-         (v* (vec 1 2)
-             2)))
+    (mapv #'round
+          (v* (vec 1 2)
+              2)))
 
   (nst:def-test v/-test (:equalp '(2 4))
-    (map 'list #'round
-         (v/ (vec 6 12)
-             3)))
+    (mapv #'round
+          (v/ (vec 6 12)
+              3)))
 
   (nst:def-test vlen^2 (:equalp 25)
     (values (round (vlen^2 (vec 3 4)))))

@@ -4,15 +4,31 @@
 
 (set-optimization-level)
 
-(deftype color () 'vector)
+(defstruct (color (:conc-name %color-)
+                (:constructor %make-color (vals)))
+  (vals (error "Must specify VALS") :type (simple-array color-component-type 1)))
+
+(defmethod make-load-form ((object color) &optional environment)
+  (declare (ignore environment))
+  `(color ,@(map 'list #'identity (%color-vals object))))
+
+(declaim (inline %color)
+         (type (function (list) color) %color))
+(defun %color (vals)
+  (with-policy-expectations
+      ((assertion (every #'realp vals))
+       (returns color))
+    (%make-color (make-array (list (length vals))
+                             :element-type 'color-component-type
+                             :initial-contents (mapcar #'color-component vals)))))
 
 (declaim (inline color)
-         (type (function (&rest real) color)))
-(defun color (&rest values)
+         (type (function (&rest real) color) color))
+(defun color (&rest vals)
   (with-policy-expectations
-      ((assertion (every #'realp values))
+      ((type list vals)
        (returns color))
-    (map 'color #'color-component values)))
+    (%color vals)))
 
 (declaim (inline colorp)
          (type (function (t) boolean) colorp))
@@ -28,7 +44,15 @@
       ((type color color)
        (type fixnum index)
        (returns color-component-type))
-    (svref color index)))
+    (aref (%color-vals color) index)))
+
+(declaim (inline csize)
+         (type (function (color) (integer 0 #.(1- array-dimension-limit))) csize))
+(defun csize (color)
+  (with-policy-expectations
+      ((type color color)
+       (returns (integer 0 #.(1- array-dimension-limit))))
+    (array-dimension (%color-vals color) 0)))
 
 (declaim (inline clerp)
          (type (function (color color real) color) clerp))
@@ -36,9 +60,12 @@
   (with-policy-expectations
       ((type color a b)
        (type real tt)
-       (assertion (= (length a) (length b)))
+       (assertion (= (csize a) (csize b)))
        (returns color))
     (flet ((lerp (a b)
              (color-component (+ (* a (- 1 tt))
                                  (* b tt)))))
-      (map 'color #'lerp a b))))
+      (let ((av (%color-vals a))
+            (bv (%color-vals b)))
+        (%color (loop :for ii :below (csize a)
+                      :collecting (lerp (aref av ii) (aref bv ii))))))))

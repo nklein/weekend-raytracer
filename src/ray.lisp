@@ -4,16 +4,19 @@
 
 (set-optimization-level)
 
-(deftype ray () '(cons vec vec))
+(defstruct (ray (:conc-name %ray-)
+                (:constructor %make-ray (origin direction)))
+  (origin (error "Must specify origin") :type vec :read-only t)
+  (direction (error "Must specify direction") :type vec :read-only t))
 
 (declaim (inline ray)
          (type (function (vec vec) ray) ray))
 (defun ray (origin direction)
   (with-policy-expectations
       ((type vec origin direction)
-       (assertion (= (length origin) (length direction)))
+       (assertion (= (vsize origin) (vsize direction)))
        (returns ray))
-    (cons origin direction)))
+    (%make-ray origin direction)))
 
 (declaim (inline rayp))
 (defun rayp (x)
@@ -27,7 +30,7 @@
   (with-policy-expectations
       ((type ray ray)
        (returns vec))
-    (car ray)))
+    (%ray-origin ray)))
 
 (declaim (inline direction)
          (type (function (ray) vec) direction))
@@ -35,7 +38,7 @@
   (with-policy-expectations
       ((type ray ray)
        (returns vec))
-    (cdr ray)))
+    (%ray-direction ray)))
 
 (declaim (inline at)
          (type (function (ray real) vec)))

@@ -18,7 +18,8 @@
            #:vlen^2
            #:vlen
            #:unit-vector
-           #:v.)
+           #:v.
+           #:mapv)
   (:export #:ray
            #:rayp
            #:origin
