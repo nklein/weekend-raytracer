@@ -268,7 +268,7 @@ image.
 If VERBOSE is non-NIL, the writing will output progress information.
 The default value is taken from the *VERBOSE* special variable."
   (let* ((dimensions (array-dimensions array))
-         (color-dimensions (first (last dimensions)))
+         (color-dimensions (the integer (first (last dimensions))))
          (dimensions (coerce (butlast dimensions) 'vector))
          (permutation (or permutation
                           (loop :for i :below (length dimensions) :collecting i)))
