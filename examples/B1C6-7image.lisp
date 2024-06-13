@@ -13,7 +13,7 @@
       ((type ray ray)
        (type list world)
        (returns color))
-    (let ((hit (hit world ray 0 most-positive-fixnum)))
+    (let ((hit (hit world ray (interval 0 most-positive-fixnum))))
       (cond
         (hit
          (let ((n (normal (to-full-hit hit))))

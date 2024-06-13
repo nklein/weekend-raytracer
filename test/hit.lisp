@@ -59,18 +59,19 @@
   (nst:def-test misses-empty-list (:equalp nil)
     (hit nil
          (ray (vec 0) (vec 1))
-         0 10))
+         (interval 0
+                   10)))
 
   (nst:def-test can-hit-first-sphere (:equalp 4)
     (values (round (tt (hit (list (sphere (vec 5) 1)
                                   (sphere (vec 10) 1))
                             (ray (vec 0) (vec 1))
-                            0
-                            10)))))
+                            (interval 0
+                                      10))))))
 
   (nst:def-test can-hit-second-sphere (:equalp 4)
     (values (round (tt (hit (list (sphere (vec 10) 1)
                                   (sphere (vec 5) 1))
                             (ray (vec 0) (vec 1))
-                            0
-                            10))))))
+                            (interval 0
+                                      10)))))))

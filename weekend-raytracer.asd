@@ -15,6 +15,9 @@
                  (:file "compile" :depends-on ("package"))
                  (:file "types" :depends-on ("package"
                                              "compile"))
+                 (:file "interval" :depends-on ("package"
+                                                "compile"
+                                                "types"))
                  (:file "vector" :depends-on ("package"
                                               "compile"
                                               "types"))
@@ -28,12 +31,14 @@
                  (:file "hit" :depends-on ("package"
                                            "compile"
                                            "types"
+                                           "interval"
                                            "vector"
                                            "color"
                                            "ray"))
                  (:file "sphere" :depends-on ("package"
                                               "compile"
                                               "types"
+                                              "interval"
                                               "vector"
                                               "color"
                                               "hit"))
@@ -72,6 +77,7 @@
    (:static-file "UNLICENSE.txt")
    (:module "test"
     :components ((:file "package")
+                 (:file "interval" :depends-on ("package"))
                  (:file "vector" :depends-on ("package"))
                  (:file "ray" :depends-on ("package"))
                  (:file "color" :depends-on ("package"))

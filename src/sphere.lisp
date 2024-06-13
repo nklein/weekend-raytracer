@@ -64,11 +64,11 @@
              (,radius^2 (radius^2 ,ss)))
          ,@body))))
 
-(defmethod hit ((obj sphere) (ray ray) tmin tmax)
+(defmethod hit ((obj sphere) ray tinterval)
   (with-policy-expectations
       ((type sphere obj)
        (type ray ray)
-       (type real tmin tmax)
+       (type interval tinterval)
        (returns (or null partial-hit)))
     (with-sphere (center radius radius^2) obj
       (with-ray (origin direction) ray
@@ -80,11 +80,9 @@
             (let ((d (- (* h h)
                         (* a c))))
               (unless (minusp d)
-                (let ((sqrtd (the vector-component-type (sqrt d)))
-                      (tmin (vector-component tmin))
-                      (tmax (vector-component tmax)))
+                (let ((sqrtd (the vector-component-type (sqrt d))))
                   (flet ((for-root (tt)
-                           (when (<= tmin tt tmax)
+                           (when (surroundsp tinterval tt)
                              (flet ((thunk ()
                                       (let* ((point (at ray tt))
                                              (normal (v/ (v- point center)

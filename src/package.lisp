@@ -8,6 +8,11 @@
            #:vector-component
            #:color-component-type
            #:color-component)
+  (:export #:interval
+           #:imin
+           #:imax
+           #:with-interval
+           #:surroundsp)
   (:export #:vec
            #:vecp
            #:vref

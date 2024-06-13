@@ -86,17 +86,17 @@
          (returns vector-component-type))
       (%partial-hit-tt hit))))
 
-(defgeneric hit (obj ray tmin tmax)
-  (:method ((obj list) ray tmin tmax)
+(defgeneric hit (obj ray tinterval)
+  (:method ((obj list) ray tinterval)
     (with-policy-expectations
         ((type list obj)
          (type ray ray)
-         (type real tmin tmax)
+         (type interval tinterval)
          (returns (or null partial-hit)))
-      (let ((tt tmax)
+      (let ((tt (imax tinterval))
             (ret nil))
         (dolist (oo obj ret)
-          (let ((hit (hit oo ray tmin tt)))
+          (let ((hit (hit oo ray (interval (imin tinterval) tt))))
             (when hit
               (setf tt (tt hit)
                     ret hit))))))))
