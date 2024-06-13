@@ -5,4 +5,5 @@
   (:export #:b1c2-2image)
   (:export #:b1c4-2image)
   (:export #:b1c5-2image)
-  (:export #:b1c6-1image))
+  (:export #:b1c6-1image)
+  (:export #:b1c6-7image))

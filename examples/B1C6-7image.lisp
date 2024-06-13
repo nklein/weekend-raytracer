@@ -1,4 +1,4 @@
-;;;; examples/B1C6-1image.lisp
+;;;; examples/B1C6-7image.lisp
 ;;;;
 ;;;; This is the analog to Book 1, Chapter 6, Section 1's output image.
 
@@ -6,43 +6,17 @@
 
 (set-optimization-level)
 
-(declaim (inline %hit-sphere-B1C6-1)
-         (type (function (sphere ray) vector-component-type) %hit-sphere-B1C6-1))
-(defun hit-sphere-B1C6-1 (sphere ray)
-  (with-policy-expectations
-      ((type sphere sphere)
-       (type ray ray)
-       (returns vector-component-type))
-    (with-sphere (center radius radius^2) sphere
-      (declare (ignore radius))
-      (with-ray (origin direction) ray
-        (let ((oc (v- center origin)))
-          (let ((a (vlen^2 direction))
-                (b (* #.(vector-component -2)
-                      (v. direction oc)))
-                (c (- (vlen^2 oc)
-                      radius^2)))
-            (let ((d (- (* b b)
-                        (* #.(vector-component 4) a c))))
-              (if (minusp d)
-                  #.(vector-component -1)
-                  (/ (- (- b)
-                        (the vector-component-type (sqrt d)))
-                     (* #.(vector-component 2) a))))))))))
-
-(declaim (inline %ray-color-B1C6-1)
-         (type (function (ray) color) %ray-color-B1C6-1))
-(defun %ray-color-B1C6-1 (ray sphere)
+(declaim (inline %ray-color-B1C6-7)
+         (type (function (ray) color) %ray-color-B1C6-7))
+(defun %ray-color-B1C6-7 (ray world)
   (with-policy-expectations
       ((type ray ray)
-       (type sphere sphere)
+       (type list world)
        (returns color))
-    (let ((tt (hit-sphere-B1C6-1 sphere ray)))
+    (let ((hit (hit world ray 0 most-positive-fixnum)))
       (cond
-        ((not (minusp tt))
-         (let ((n (v/ (v- (at ray tt)
-                          (center sphere))
-                      (radius sphere))))
+        (hit
+         (let ((n (normal (to-full-hit hit))))
            (flet ((to-color (ii)
                     (/ (1+ (color-component (vref n ii)))
                        #.(color-component 2))))
@@ -59,7 +33,7 @@
                   #.(color 1 7/10 1/2)
                   b)))))))
 
-(defun b1c6-1image (&optional verticalp)
+(defun b1c6-7image (&optional verticalp)
   "This example renders an image cube that is 320x180x5.
 
 The optional parameter VERTICALP can be used to have the output image
@@ -106,7 +80,8 @@ coordinates."
                                                pixel-delta-v
                                                pixel-delta-w))
                                  2)))
-           (sphere (sphere (vec -1 0 0 1/32) 1/2)))
+           (world (list (sphere (vec -1 0 0 1/32) 1/2)
+                        (sphere (vec -1 0 -100.5 -1) 100))))
       (loop :for z :below depth
             :for du := (v* pixel-delta-w z)
             :for z-loc := (v+ pixel000-loc du)
@@ -119,11 +94,11 @@ coordinates."
                                 :for pixel-center := xyz-loc
                                 :for ray-direction := (v- pixel-center camera-center)
                                 :for ray := (ray camera-center ray-direction)
-                                :for pixel-color := (%ray-color-B1C6-1 ray sphere)
+                                :for pixel-color := (%ray-color-B1C6-7 ray world)
                                 :do (setf (aref img x y z 0) (cref pixel-color 0)
                                           (aref img x y z 1) (cref pixel-color 1)
                                           (aref img x y z 2) (cref pixel-color 2))))))
-    (write-image #P"B1C6-1image" img
+    (write-image #P"B1C6-7image" img
                  :border-width 2
                  :border-color (vector 0 0 0 0)
                  :permutation (if verticalp
