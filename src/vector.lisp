@@ -15,7 +15,7 @@
   `(vec ,@(map 'list #'identity (%vec-vals object))))
 
 (declaim (inline %vec)
-         (type (function (list) vec) b))
+         (type (function (list) vec) %vec))
 (defun %vec (vals)
   (with-policy-expectations
       ((type list vals)
@@ -50,7 +50,7 @@
     (aref (%vec-vals vec) index)))
 
 (declaim (inline vsize)
-         (type (function (vec) (integer 0 #.(1- array-dimension-limit)))))
+         (type (function (vec) (integer 0 #.(1- array-dimension-limit))) vsize))
 (defun vsize (v)
   (with-policy-expectations
       ((type vec v)

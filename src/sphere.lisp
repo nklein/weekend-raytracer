@@ -80,5 +80,4 @@
                       radius^2)))
             (let ((d (- (* b b)
                         (* #.(vector-component 4) a c)) ))
-              (format *debug-io* "~A :: ~A ~A ~A => ~A~%" oc a b c d)
               (not (minusp d)))))))))

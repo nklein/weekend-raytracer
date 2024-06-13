@@ -41,3 +41,30 @@ with the following function:
 The image here is a 3-D image cube rendered as horizontal slices.
 The color of each pixel is based on the 3rd and 4th coordinates
 of the camera ray's direction.
+
+
+### 1.5.2: Book 1, Chapter 5, Section 2: Creating an Image File
+
+The book image here renders an interpolation between blue and
+white with a red sphere in the center of the view.
+
+The book has the image plane in the negative-z direction and
+then uses x and y for coordinates within the image square.
+
+For maximum utility when changing number of dimensions, this
+code puts the image plane in the negative-x direction and
+then uses y, z, and w to move around the image cube.
+
+I have moved the sphere slightly in the w direction.
+
+![Image cube](./images/B1C5-2image.png)
+
+You can output an image akin to Book 1, Chapter 5, Section 2's image
+with the following function:
+
+    (weekend-raytracer/examples:b1c5-2image &optional verticalp)
+
+The image here is a 3-D image cube rendered as horizontal slices.
+The color of each pixel is based on the 3rd and 4th coordinates
+of the camera ray's direction except where the ray intersects the
+sphere. Where the ray intersects the sphere, the image is solid red.

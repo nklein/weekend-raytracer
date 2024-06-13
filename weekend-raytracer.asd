@@ -47,7 +47,8 @@
    (:module "examples"
     :components ((:file "package")
                  (:file "B1C2-2image" :depends-on ("package"))
-                 (:file "B1C4-2image" :depends-on ("package"))))))
+                 (:file "B1C4-2image" :depends-on ("package"))
+                 (:file "B1C5-2image" :depends-on ("package"))))))
 
 (asdf:defsystem #:weekend-raytracer/test
   :description "Tests for the WEEKEND-RAYTRACER package."

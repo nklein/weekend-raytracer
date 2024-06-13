@@ -1,27 +1,32 @@
-;;;; examples/B1C4-2image.lisp
+;;;; examples/B1C5-2image.lisp
 ;;;;
-;;;; This is the analog to Book 1, Chapter 4, Section 2's output image.
+;;;; This is the analog to Book 1, Chapter 5, Section 2's output image.
 
 (in-package #:weekend-raytracer/examples)
 
 (set-optimization-level)
 
-(declaim (inline %ray-color)
-         (type (function (ray) color) %ray-color))
-(defun %ray-color (ray)
+(declaim (inline %ray-color-B1C5-2)
+         (type (function (ray) color) %ray-color-B1C5-2))
+(defun %ray-color-B1C5-2 (ray sphere)
   (with-policy-expectations
       ((type ray ray)
+       (type sphere sphere)
        (returns color))
-    (let* ((unit-direction (unit-vector (direction ray)))
-           (a (/ (1+ (vref unit-direction 2)) 2))
-           (b (/ (1+ (vref unit-direction 3)) 2)))
-      (clerp (clerp #.(color 1 1 1)
-                    #.(color 1/2 7/10 1)
-                    a)
-             #.(color 1 7/10 1/2)
-             b))))
+    (cond
+      ((hit-sphere sphere ray)
+       #.(color 1 0 0))
+      (t
+       (let* ((unit-direction (unit-vector (direction ray)))
+              (a (/ (1+ (vref unit-direction 2)) 2))
+              (b (/ (1+ (vref unit-direction 3)) 2)))
+         (clerp (clerp #.(color 1 1 1)
+                       #.(color 1/2 7/10 1)
+                       a)
+                #.(color 1 7/10 1/2)
+                b))))))
 
-(defun b1c4-2image (&optional verticalp)
+(defun b1c5-2image (&optional verticalp)
   "This example renders an image cube that is 320x180x5.
 
 The optional parameter VERTICALP can be used to have the output image
@@ -44,7 +49,7 @@ coordinates."
 
            (viewport-height 2.0d0)
            (viewport-width (* viewport-height width (/ height)))
-           (viewport-depth 2.0d0)
+           (viewport-depth 1.5d0)
 
            (camera-center (vec 0 0 0 0))
 
@@ -67,7 +72,8 @@ coordinates."
                                          (list pixel-delta-u
                                                pixel-delta-v
                                                pixel-delta-w))
-                                 2))))
+                                 2)))
+           (sphere (sphere (vec -1 0 0 1/32) 1/2)))
       (loop :for z :below depth
             :for du := (v* pixel-delta-w z)
             :for z-loc := (v+ pixel000-loc du)
@@ -80,11 +86,11 @@ coordinates."
                                 :for pixel-center := xyz-loc
                                 :for ray-direction := (v- pixel-center camera-center)
                                 :for ray := (ray camera-center ray-direction)
-                                :for pixel-color := (%ray-color ray)
+                                :for pixel-color := (%ray-color-B1C5-2 ray sphere)
                                 :do (setf (aref img x y z 0) (cref pixel-color 0)
                                           (aref img x y z 1) (cref pixel-color 1)
                                           (aref img x y z 2) (cref pixel-color 2))))))
-    (write-image #P"B1C4-2image" img
+    (write-image #P"B1C5-2image" img
                  :border-width 2
                  :border-color (vector 0 0 0 0)
                  :permutation (if verticalp
