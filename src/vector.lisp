@@ -6,7 +6,9 @@
 
 (defstruct (vec (:conc-name %vec-)
                 (:constructor %make-vec (vals)))
-  (vals (error "Must specify VALS") :type (simple-array vector-component-type 1)))
+  (vals (error "Must specify VALS") :type (simple-array vector-component-type 1) :read-only t)
+  (vlen^2 nil :type (or null vector-component-type))
+  (vlen nil :type (or null vector-component-type)))
 
 (defmethod make-load-form ((object vec) &optional environment)
   (declare (ignore environment))
@@ -152,10 +154,12 @@
   (with-policy-expectations
       ((type vec vec)
        (returns vector-component-type))
-    (reduce #'+ (%vec-vals vec)
-            :key (lambda (x)
-                   (declare (type vector-component-type x))
-                   (* x x)))))
+    (or (%vec-vlen^2 vec)
+        (setf (%vec-vlen^2 vec)
+              (reduce #'+ (%vec-vals vec)
+                      :key (lambda (x)
+                             (declare (type vector-component-type x))
+                             (* x x)))))))
 
 (declaim (inline vlen)
          (type (function (vec) vector-component-type) vlen))
@@ -163,7 +167,9 @@
   (with-policy-expectations
       ((type vec vec)
        (returns vector-component-type))
-    (the vector-component-type (sqrt (vlen^2 vec)))))
+    (or (%vec-vlen vec)
+        (setf (%vec-vlen vec)
+              (the vector-component-type (sqrt (vlen^2 vec)))))))
 
 (declaim (inline unit-vector)
          (type (function (vec) vec) unit-vector))
@@ -171,7 +177,10 @@
   (with-policy-expectations
       ((type vec vec)
        (returns vec))
-    (v/ vec (vlen vec))))
+    (let ((ret (v/ vec (vlen vec))))
+      (setf (%vec-vlen^2 ret) (vector-component 1)
+            (%vec-vlen ret) (vector-component 1))
+      ret)))
 
 (declaim (inline v.)
          (type (function (vec vec) vector-component-type) v.))

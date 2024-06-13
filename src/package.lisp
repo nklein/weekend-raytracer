@@ -25,6 +25,8 @@
            #:origin
            #:direction
            #:at)
+  (:export #:sphere
+           #:hit-sphere)
   (:export #:color
            #:colorp
            #:cref

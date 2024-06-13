@@ -9,6 +9,9 @@
   (nst:def-test construct-a-4d-vector (:true)
     (vec 1 2 3 4))
 
+  (nst:def-test can-load-a-vector (:true)
+    #.(vec 1 2 3 4))
+
   (nst:def-test constructor-returns-a-vec (:true)
     (typep (vec 1 2 3) 'vec))
 

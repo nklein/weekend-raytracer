@@ -9,6 +9,10 @@
   (origin (error "Must specify origin") :type vec :read-only t)
   (direction (error "Must specify direction") :type vec :read-only t))
 
+(defmethod make-load-form ((object ray) &optional environment)
+  `(ray ,(make-load-form (origin object) environment)
+        ,(make-load-form (direction object) environment)))
+
 (declaim (inline ray)
          (type (function (vec vec) ray) ray))
 (defun ray (origin direction)
@@ -40,6 +44,13 @@
        (returns vec))
     (%ray-direction ray)))
 
+(defmacro with-ray ((origin direction) ray &body body)
+  (let ((rr (gensym "RR-")))
+    `(let ((,rr ,ray))
+       (let ((,origin (origin ,rr))
+             (,direction (direction ,rr)))
+         ,@body))))
+
 (declaim (inline at)
          (type (function (ray real) vec)))
 (defun at (ray tt)
@@ -47,8 +58,7 @@
       ((type ray ray)
        (type real tt)
        (returns vec))
-    (let ((origin (origin ray))
-          (direction (direction ray)))
+    (with-ray (origin direction) ray
       (with-policy-expectations
           ((type vec origin direction))
         (v+ origin

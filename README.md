@@ -25,7 +25,7 @@ constant blueness (or as vertical slices of constant blueness if
 `VERTICALP` is non-`NIL`). The first slice is identical to the
 book image.
 
-### 1.2.2: Book 1, Chapter 4, Section 2: Creating an Image File
+### 1.4.2: Book 1, Chapter 4, Section 2: Creating an Image File
 
 The book image here renders an interpolation between blue and
 white. This image renders between blue and white but also between

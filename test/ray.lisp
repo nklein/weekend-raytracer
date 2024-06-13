@@ -6,6 +6,9 @@
   (nst:def-test can-construct-a-ray (:true)
     (ray (vec 1 2 3) (vec 1 0 0)))
 
+  (nst:def-test can-load-a-ray (:true)
+    #.(ray (vec 1 2 3) (vec 1 0 0)))
+
   (nst:def-test constructor-returns-a-ray (:true)
     (typep (ray (vec 1 2 3) (vec 1 0 0)) 'ray))
 

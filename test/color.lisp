@@ -6,6 +6,9 @@
   (nst:def-test can-construct-an-rgb-color (:true)
     (color 1/3 1/2 2/3))
 
+  (nst:def-test can-load-a-color (:true)
+    #.(color 1/3 1/2 2/3))
+
   (nst:def-test can-construct-a-grayscale-color (:true)
     (color 1/2))
 
