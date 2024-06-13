@@ -56,28 +56,10 @@
        (returns vector-component-type))
     (%sphere-radius^2 s)))
 
-(defmacro with-sphere^2 ((center radius radius^2) sphere &body body)
+(defmacro with-sphere ((center radius radius^2) sphere &body body)
   (let ((ss (gensym "SS-")))
     `(let ((,ss ,sphere))
        (let ((,center (center ,ss))
              (,radius (radius ,ss))
              (,radius^2 (radius^2 ,ss)))
          ,@body))))
-
-(defun hit-sphere (sphere ray)
-  (with-policy-expectations
-      ((type sphere sphere)
-       (type ray ray)
-       (returns boolean))
-    (with-sphere^2 (center radius radius^2) sphere
-      (declare (ignore radius))
-      (with-ray (origin direction) ray
-        (let ((oc (v- center origin)))
-          (let ((a (vlen^2 direction))
-                (b (* #.(vector-component -2)
-                      (v. direction oc)))
-                (c (- (vlen^2 oc)
-                      radius^2)))
-            (let ((d (- (* b b)
-                        (* #.(vector-component 4) a c)) ))
-              (not (minusp d)))))))))

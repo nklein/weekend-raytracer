@@ -4,7 +4,7 @@
   :description "WEEKEND-RAYTRACER is another n-dimensional raytracer."
   :author "Patrick Stein <pat@nklein.com>"
   :license "UNLICENSE"
-  :version "0.1.20240425"
+  :version "0.2.20240613"
   :depends-on (#:policy-cond #:zpng)
   :in-order-to ((asdf:test-op (asdf:test-op :weekend-raytracer/test)))
   :components
@@ -38,8 +38,8 @@
   :description "Examples for the WEEKEND-RAYTRACER package."
   :author "Patrick Stein <pat@nklein.com>"
   :license "UNLICENSE"
-  :version "0.1.20240425"
-  :depends-on ((:version #:weekend-raytracer "0.1.20240425"))
+  :version "0.2.20240613"
+  :depends-on ((:version #:weekend-raytracer "0.2.20240613"))
   :in-order-to ((asdf:test-op (asdf:test-op :weekend-raytracer/test)))
   :components
   ((:static-file "README.md")
@@ -48,14 +48,15 @@
     :components ((:file "package")
                  (:file "B1C2-2image" :depends-on ("package"))
                  (:file "B1C4-2image" :depends-on ("package"))
-                 (:file "B1C5-2image" :depends-on ("package"))))))
+                 (:file "B1C5-2image" :depends-on ("package"))
+                 (:file "B1C6-1image" :depends-on ("package"))))))
 
 (asdf:defsystem #:weekend-raytracer/test
   :description "Tests for the WEEKEND-RAYTRACER package."
   :author "Patrick Stein <pat@nklein.com>"
   :license "UNLICENSE"
-  :version "0.1.20240425"
-  :depends-on ((:version #:weekend-raytracer "0.1.20240425") #:nst)
+  :version "0.2.20240613"
+  :depends-on ((:version #:weekend-raytracer "0.2.20240613") #:nst)
   :perform (asdf:test-op (o c)
                          (uiop:symbol-call :weekend-raytracer/test :run-all-tests))
   :components

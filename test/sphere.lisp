@@ -9,6 +9,7 @@
   (nst:def-test can-load-a-unit-sphere (:true)
     #.(sphere (vec 1 2 3) 4)))
 
+#+(or)
 (nst:def-test-group sphere-intersection-tests ()
   (nst:def-test can-intersect-sphere (:true)
     (hit-sphere (sphere (vec 4 5) 3)

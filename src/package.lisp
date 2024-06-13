@@ -24,9 +24,12 @@
            #:rayp
            #:origin
            #:direction
-           #:at)
+           #:at
+           #:with-ray)
   (:export #:sphere
-           #:hit-sphere)
+           #:center
+           #:radius
+           #:with-sphere)
   (:export #:color
            #:colorp
            #:cref
