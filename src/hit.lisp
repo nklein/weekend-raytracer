@@ -5,22 +5,24 @@
 (set-optimization-level)
 
 (defstruct (full-hit (:conc-name %full-hit-)
-                     (:constructor %make-full-hit (tt point normal)))
+                     (:constructor %make-full-hit (tt front-face-p point normal)))
   (tt (error "Must provide TT") :type vector-component-type :read-only t)
+  (front-face-p (error "Must provide FRONT-FACE") :type boolean :read-only t)
   (point (error "Must provide POINT") :type vec :read-only t)
   (normal (error "Must provide NORMAL") :type vec :read-only t))
 
 (declaim (inline full-hit)
-         (type (function (real vec vec) full-hit) full-hit))
-(defun full-hit (tt point normal)
+         (type (function (real boolean vec vec) full-hit) full-hit))
+(defun full-hit (tt front-face-p point normal)
   (with-policy-expectations
       ((type real tt)
+       (type boolean front-face-p)
        (type vec point normal)
        (assertion (let ((scale 100000))
                     (= (round (vlen^2 normal) (/ scale))
                        scale)))
        (returns full-hit))
-    (%make-full-hit (vector-component tt) point normal)))
+    (%make-full-hit (vector-component tt) front-face-p point normal)))
 
 (defstruct (partial-hit (:conc-name %partial-hit-)
                         (:constructor %make-partial-hit (tt thunk)))
@@ -46,6 +48,14 @@
     (or (%partial-hit-full-hit hit)
         (setf (%partial-hit-full-hit hit)
               (funcall (%partial-hit-thunk hit))))))
+
+(declaim (inline front-face-p)
+         (type (function (full-hit) boolean) front-face-p))
+(defun front-face-p (hit)
+  (with-policy-expectations
+      ((type full-hit hit)
+       (returns boolean))
+    (%full-hit-front-face-p hit)))
 
 (declaim (inline point)
          (type (function (full-hit) vec) point))

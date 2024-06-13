@@ -86,11 +86,18 @@
                   (flet ((for-root (tt)
                            (when (<= tmin tt tmax)
                              (flet ((thunk ()
-                                      (let ((point (at ray tt)))
+                                      (let* ((point (at ray tt))
+                                             (normal (v/ (v- point center)
+                                                         radius))
+                                             (front-face-p (minusp (v. direction
+                                                                       normal))))
                                         (full-hit tt
+                                                  front-face-p
                                                   point
-                                                  (v/ (v- point center)
-                                                      radius)))))
+                                                  (if front-face-p
+                                                      normal
+                                                      (v* normal
+                                                          #.(vector-component -1)))))))
                                (partial-hit tt #'thunk)))))
                     (or (for-root (/ (- h sqrtd) a))
                         (for-root (/ (+ h sqrtd) a)))))))))))))

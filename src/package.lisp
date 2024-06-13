@@ -28,6 +28,7 @@
            #:with-ray)
   (:export #:hit
            #:tt
+           #:front-face-p
            #:point
            #:normal
            #:full-hit
