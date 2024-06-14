@@ -33,13 +33,22 @@
                                            "types"
                                            "interval"
                                            "vector"
-                                           "color"
-                                           "ray"))
+                                           "ray"
+                                           "color"))
                  (:file "sphere" :depends-on ("package"
                                               "compile"
                                               "types"
                                               "interval"
                                               "vector"
+                                              "ray"
+                                              "color"
+                                              "hit"))
+                 (:file "camera" :depends-on ("package"
+                                              "compile"
+                                              "types"
+                                              "interval"
+                                              "vector"
+                                              "ray"
                                               "color"
                                               "hit"))
                  (:file "output" :depends-on ("package"
@@ -83,5 +92,6 @@
                  (:file "color" :depends-on ("package"))
                  (:file "hit" :depends-on ("package"))
                  (:file "sphere" :depends-on ("package"))
+                 (:file "camera" :depends-on ("package"))
                  (:file "output" :depends-on ("package"))
                  (:file "run" :depends-on ("package"))))))

@@ -47,5 +47,7 @@
            #:colorp
            #:cref
            #:clerp)
+  (:export #:camera
+           #:render)
   (:export #:*verbose*
            #:write-image))

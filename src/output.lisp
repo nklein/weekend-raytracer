@@ -6,19 +6,11 @@
 
 (deftype index-vector () '(vector t))
 
-(defun %valid-permutation-p (permutation length)
-  (and (every #'integerp permutation)
-       (every (lambda (x)
-                (<= 0 x (1- length)))
-              permutation)
-       (= (length permutation) length)
-       (equalp permutation (remove-duplicates permutation :test #'=))))
-
 (defun %collect-width-and-height-components (dimensions permutation cutoff)
   (with-policy-expectations
       ((type (or null index-vector) dimensions permutation)
        (type fixnum cutoff)
-       (assertion (%valid-permutation-p permutation (length dimensions))))
+       (assertion (%valid-permutation-p permutation (1+ (length dimensions)))))
     (let ((width nil)
           (height nil))
       (with-policy-expectations
@@ -62,7 +54,7 @@
   (with-policy-expectations
       ((type (or null index-vector) dimensions permutation)
        (type fixnum border-width cutoff)
-       (assertion (%valid-permutation-p permutation (length dimensions))))
+       (assertion (%valid-permutation-p permutation (1+ (length dimensions)))))
     (multiple-value-bind (widths heights) (%collect-width-and-height-components dimensions permutation cutoff)
       (values (with-policy-expectations
                   ((returns fixnum))
@@ -116,7 +108,7 @@
        (type fixnum cutoff width height border-width)
        (type list border-color)
        (type boolean verbose)
-       (assertion (%valid-permutation-p permutation (length dimensions))))
+       (assertion (%valid-permutation-p permutation (1+ (length dimensions)))))
     (multiple-value-bind (widths heights) (%collect-width-and-height-components dimensions permutation cutoff)
       (let ((pixel-indexes (mapcar (constantly 0) (list* 1 (coerce dimensions 'list)))))
         (with-policy-expectations
@@ -175,7 +167,7 @@
        (type fixnum cutoff)
        (type fixnum width height border-width)
        (type list border-color)
-       (assertion (%valid-permutation-p permutation (length dimensions)))
+       (assertion (%valid-permutation-p permutation (1+ (length dimensions))))
        (returns (or null
                     pathname)))
     (let ((png (make-instance 'zpng:pixel-streamed-png
@@ -280,7 +272,7 @@ The default value is taken from the *VERBOSE* special variable."
                                    (loop :repeat color-dimensions :collecting 0)))))
     (check-type border-width (integer 0))
     (check-type border-color list)
-    (assert (%valid-permutation-p permutation (length dimensions)) (permutation)
+    (assert (%valid-permutation-p permutation (1+ (length dimensions))) (permutation)
             "Permutation ~A does not word for dimensions ~D"
             permutation
             (length dimensions))

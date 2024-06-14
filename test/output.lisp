@@ -4,25 +4,25 @@
 
 (nst:def-test-group output-%permutation-tests ()
   (nst:def-test in-order-is-valid (:true)
-    (weekend-raytracer::%valid-permutation-p (list 0 1 2) 3))
+    (weekend-raytracer::%valid-permutation-p (list 0 1 2) 4))
 
   (nst:def-test random-order-is-valid (:true)
-    (weekend-raytracer::%valid-permutation-p '(2 0 3 1) 4))
+    (weekend-raytracer::%valid-permutation-p '(2 0 3 1) 5))
 
   (nst:def-test below-range-is-invalid (:not :true)
-    (weekend-raytracer::%valid-permutation-p '(-1 0 2 1) 4))
+    (weekend-raytracer::%valid-permutation-p '(-1 0 2 1) 5))
 
   (nst:def-test above-range-is-invalid (:not :true)
-    (weekend-raytracer::%valid-permutation-p '(1 0 2 4) 4))
+    (weekend-raytracer::%valid-permutation-p '(1 0 2 4) 5))
 
   (nst:def-test duplicates-are-invalid (:not :true)
-    (weekend-raytracer::%valid-permutation-p '(2 0 2 1) 4))
+    (weekend-raytracer::%valid-permutation-p '(2 0 2 1) 5))
 
   (nst:def-test short-permutations-are-invalid (:not :true)
-    (weekend-raytracer::%valid-permutation-p '(0 1 2) 4))
+    (weekend-raytracer::%valid-permutation-p '(0 1 2) 5))
 
   (nst:def-test long-permutations-are-invalid (:not :true)
-    (weekend-raytracer::%valid-permutation-p '(0 1 2 3 4 5) 4)))
+    (weekend-raytracer::%valid-permutation-p '(0 1 2 3 4 5) 5)))
 
 (nst:def-test-group output-%collect-width-and-height-components-tests ()
   (nst:def-test empty-dimensions-returns-empty-vector (:values (:equalp #.(vector)) (:equalp #.(vector)))
