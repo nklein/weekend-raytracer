@@ -134,3 +134,26 @@ sphere. Where the ray intersects the spheres, the color is
     r = (/ (1+ (vref normal 1)) 2)
     g = (/ (1+ (vref normal 2)) 2)
     b = (/ (1+ (vref normal 0)) 2)
+
+### 1.7.1: Book 1, Chapter 7, Section 1: Moving Camera Code Into Its Own Class
+
+This is essentially the same as image 1.6.7 above.
+The difference here is that the camera is moved into its own class.
+The sky color is also not being LERP-ed at the moment as a function
+of the normal to simplify allowing the camera to take in arbitrary
+numbers of spatial and color dimensions.
+
+![Image cube](./images/B1C7-1image.png)
+
+You can generate this image with the following function:
+
+    (weekend-raytracer/examples:b1c7-1image &optional verticalp)
+
+The image here is a 3-D image cube rendered as horizontal slices.
+The color of each pixel is the default sky color except where the ray
+intersects the sphere.
+Where the ray intersects the spheres, the color is
+
+    r = (/ (1+ (vref normal 1)) 2)
+    g = (/ (1+ (vref normal 2)) 2)
+    b = (/ (1+ (vref normal 0)) 2)

@@ -38,7 +38,7 @@
          (interval 0
                    1)))
 
-  (nst:def-test normal-is-right-from-outside (:values :true (:equalp #.(vec -1)))
+  (nst:def-test normal-is-right-from-outside (:values :true (vec= #.(vec -1)))
     (let ((hit (to-full-hit (hit (sphere (vec 4) 3)
                                  (ray (vec 0)
                                       (vec 1))
@@ -47,7 +47,7 @@
       (values (front-face-p hit)
               (normal hit))))
 
-  (nst:def-test normal-is-right-from-inside (:values (:not :true) (:equalp #.(vec -1)))
+  (nst:def-test normal-is-right-from-inside (:values (:not :true) (vec= #.(vec -1)))
     (let ((hit (to-full-hit (hit (sphere (vec 4) 3)
                                  (ray (vec 4)
                                       (vec 1))

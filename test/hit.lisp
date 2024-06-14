@@ -17,7 +17,7 @@
     (and (front-face-p (full-hit 3 t (vec 1 2 3) (vec 1 0 0)))
          (not (front-face-p (full-hit 3 nil (vec 1 2 3) (vec 1 0 0))))))
 
-  (nst:def-test can-get-point-from-full-hit (:equalp #.(vec 1 2 3))
+  (nst:def-test can-get-point-from-full-hit (vec= #.(vec 1 2 3))
     (point (full-hit 3 t (vec 1 2 3) (vec 1 0 0))))
 
   (nst:def-test can-get-normal-from-full-hit (:equalp 0)

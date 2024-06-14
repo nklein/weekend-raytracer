@@ -14,9 +14,9 @@
             :spatial-dimensions 4
             :color-dimensions 3))
 
-  (nst:def-test can-construct-a-camera-with-permutation (:true)
+  (nst:def-test can-construct-a-camera-with-viewport (:true)
     (camera :width 100
-            :permutation (list 0 2 1)
+            :viewport (list 2 2 3/2)
             :spatial-dimensions 4
             :color-dimensions 3))
 
@@ -38,21 +38,8 @@
             :spatial-dimensions 4
             :color-dimensions 3))
 
-  (nst:def-test constructor-raises-error-if-permutation-is-wrong-length (:err)
+  (nst:def-test constructor-raises-error-if-viewport-is-wrong-length (:err)
     (camera :width 100
-            :permutation (list 0 1)
+            :viewport (list 2 3)
             :spatial-dimensions 4
-            :color-dimensions 3))
-
-  (nst:def-test constructor-raises-error-if-permutation-has-repeats (:err)
-    (camera :width 100
-            :permutation (list 0 1 0)
-            :spatial-dimensions 4
-            :color-dimensions 3))
-
-  (nst:def-test constructor-raises-error-if-permutation-out-of-range (:err)
-    (camera :width 100
-            :permutation (list 1 2 3)
-            :spatial-dimensions 4
-            :color-dimensions 3))
-  )
+            :color-dimensions 3)))

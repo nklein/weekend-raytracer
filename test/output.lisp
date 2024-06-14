@@ -25,20 +25,20 @@
     (weekend-raytracer::%valid-permutation-p '(0 1 2 3 4 5) 5)))
 
 (nst:def-test-group output-%collect-width-and-height-components-tests ()
-  (nst:def-test empty-dimensions-returns-empty-vector (:values (:equalp #.(vector)) (:equalp #.(vector)))
+  (nst:def-test empty-dimensions-returns-empty-vector (:values (:equalp nil) (:equalp nil))
     (weekend-raytracer::%collect-width-and-height-components nil nil 1))
 
-  (nst:def-test width-height (:values (:equalp #.(vector 10)) (:equalp #.(vector 20)))
-    (weekend-raytracer::%collect-width-and-height-components (vector 10 20) (vector 0 1) 1))
+  (nst:def-test width-height (:values (:equalp '(10)) (:equalp '(20)))
+    (weekend-raytracer::%collect-width-and-height-components '(10 20) '(0 1) 1))
 
-  (nst:def-test all-width (:values (:equalp #.(vector 10 20)) (:equalp #.(vector)))
-    (weekend-raytracer::%collect-width-and-height-components (vector 10 20) (vector 0 1) 2))
+  (nst:def-test all-width (:values (:equalp '(10 20)) (:equalp nil))
+    (weekend-raytracer::%collect-width-and-height-components '(10 20) '(0 1) 2))
 
-  (nst:def-test width-height-swapped (:values (:equalp #.(vector 20)) (:equalp #.(vector 10)))
-    (weekend-raytracer::%collect-width-and-height-components (vector 10 20) (vector 1 0) 1))
+  (nst:def-test width-height-swapped (:values (:equalp '(20)) (:equalp '(10)))
+    (weekend-raytracer::%collect-width-and-height-components '(10 20) '(1 0) 1))
 
-  (nst:def-test width-height-depth-ana (:values (:equalp #.(vector 10 20)) (:equalp #.(vector 5 2)))
-    (weekend-raytracer::%collect-width-and-height-components (vector 10 20 5 2) (vector 0 1 2 3) 2)))
+  (nst:def-test width-height-depth-ana (:values (:equalp '(10 20)) (:equalp '(5 2)))
+    (weekend-raytracer::%collect-width-and-height-components '(10 20 5 2) '(0 1 2 3) 2)))
 
 (nst:def-test-group output-%calculate-one-output-size-tests ()
   (nst:def-test one-frame (:eql 10)
@@ -82,7 +82,7 @@
     (weekend-raytracer::%calculate-output-size (vector 10 5 20) 2 (vector 0 1 2) 2))
 
   (nst:def-test width-height-depth-ana-border (:values (:eql 54) (:eql 41))
-    (weekend-raytracer::%calculate-output-size (vector 10 5 20 2) 1 (vector 0 1 2 3) 2)))
+    (weekend-raytracer::%calculate-output-size '(10 5 20 2) 1 '(0 1 2 3) 2)))
 
 (nst:def-test-group output-%border-p-tests ()
   (nst:def-test not-border (:eql nil)

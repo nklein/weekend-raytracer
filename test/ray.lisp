@@ -19,8 +19,8 @@
   (nst:def-test origin (:equalp #.(vec 1 2 3))
     (origin (ray (vec 1 2 3) (vec 1 0 0))))
 
-  (nst:def-test direction (:equalp #.(vec 1 0 0))
+  (nst:def-test direction (vec= #.(vec 1 0 0))
     (direction (ray (vec 1 2 3) (vec 1 0 0))))
 
-  (nst:def-test at (:equalp #.(vec 3 5))
+  (nst:def-test at (vec= #.(vec 3 5))
     (at (ray (vec 1 9) (vec 1 -2)) 2)))

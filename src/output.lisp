@@ -4,7 +4,19 @@
 
 (set-optimization-level)
 
-(deftype index-vector () '(vector t))
+(deftype index-vector () 'sequence)
+
+(defun %default-permutation (spatial-dimensions)
+  (loop :for ii :below (1- spatial-dimensions)
+        :collecting ii))
+
+(defun %valid-permutation-p (permutation spatial-dimensions)
+  (let ((defaults (%default-permutation spatial-dimensions))
+        (permutation (coerce permutation 'list)))
+    (and (null (set-difference defaults permutation :test #'=))
+         (null (set-difference permutation defaults :test #'=))
+         (= (length permutation)
+            (1- spatial-dimensions)))))
 
 (defun %collect-width-and-height-components (dimensions permutation cutoff)
   (with-policy-expectations
