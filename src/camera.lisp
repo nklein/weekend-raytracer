@@ -166,42 +166,39 @@
 
 (declaim (inline %ray-color)
          (type (function (ray list (integer 1 *) (integer 1 4)) color) %ray-color))
-(let ((cntr 0))
-  (defun %ray-color (ray world spatial-dimensions color-dimensions sky-color)
-    (with-policy-expectations
-        ((type ray ray)
-         (type list world)
-         (type (integer 1 *) spatial-dimensions)
-         (type (integer 1 4) color-dimensions)
-         (type color sky-color)
-         (returns color))
-      (let ((hit (hit world ray (interval 0 most-positive-fixnum))))
-        (cond
-          (hit
-           (let ((n (normal (to-full-hit hit))))
-             (when (< (incf cntr) 10)
-               (format *debug-io* "N = ~A~%" n))
-             (flet ((remap (ii)
-                      (cond
-                        ;; rotate the normal coordinates a bit for
-                        ;; prettier colors
-                        ((and (< ii 3)
-                              (<= 3 color-dimensions))
-                         (elt '(1 2 0) ii))
-                        (t
-                         ii)))
-                    (to-color (ii)
-                      (cond
-                        ((< ii spatial-dimensions)
-                         (/ (1+ (color-component (vref n ii)))
-                            #.(color-component 2)))
-                        (t
-                         #.(color-component 1)))))
-               (apply #'color (loop :for ii :below color-dimensions
-                                    :for jj := (remap ii)
-                                    :collecting (to-color jj))))))
-          (t
-           sky-color))))))
+(defun %ray-color (ray world spatial-dimensions color-dimensions sky-color)
+  (with-policy-expectations
+      ((type ray ray)
+       (type list world)
+       (type (integer 1 *) spatial-dimensions)
+       (type (integer 1 4) color-dimensions)
+       (type color sky-color)
+       (returns color))
+    (let ((hit (hit world ray (interval 0 most-positive-fixnum))))
+      (cond
+        (hit
+         (let ((n (normal (to-full-hit hit))))
+           (flet ((remap (ii)
+                    (cond
+                      ;; rotate the normal coordinates a bit for
+                      ;; prettier colors
+                      ((and (< ii 3)
+                            (<= 3 color-dimensions))
+                       (elt '(1 2 0) ii))
+                      (t
+                       ii)))
+                  (to-color (ii)
+                    (cond
+                      ((< ii spatial-dimensions)
+                       (/ (1+ (color-component (vref n ii)))
+                          #.(color-component 2)))
+                      (t
+                       #.(color-component 1)))))
+             (apply #'color (loop :for ii :below color-dimensions
+                                  :for jj := (remap ii)
+                                  :collecting (to-color jj))))))
+        (t
+         sky-color)))))
 
 (defun %make-sky-color (color-dimensions)
   (ecase color-dimensions
