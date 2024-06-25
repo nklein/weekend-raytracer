@@ -12,6 +12,7 @@
   (spatial-dimensions (error "Must specify SPATIAL-DIMENSIONS") :type spatial-dimensions-type :read-only t)
   (color-dimensions (error "Must specify COLOR-DIMENSIONS") :type color-dimensions-type :read-only t)
   (image-dimensions (error "Must specify IMAGE-DIMENSIONS") :type list :read-only t)
+  (aspect-ratios (error "Must specify IMAGE-DIMENSIONS") :type list :read-only t)
   (viewport (error "Must specify VIEWPORT") :type list :read-only t)
   (center (error "Must specify CENTER") :type vec :read-only t))
 
@@ -113,6 +114,7 @@
       (let ((camera (%make-camera :spatial-dimensions spatial-dimensions
                                   :color-dimensions color-dimensions
                                   :image-dimensions image-dimensions
+                                  :aspect-ratios aspect-ratios
                                   :viewport viewport
                                   :center (apply #'vec (loop :repeat spatial-dimensions :collecting 0)))))
         camera))))
@@ -164,9 +166,9 @@
                 :for delta :in deltas
                 :collecting (v* delta index))))
 
-(declaim (inline %ray-color)
-         (type (function (ray list (integer 1 *) (integer 1 4)) color) %ray-color))
-(defun %ray-color (ray world spatial-dimensions color-dimensions sky-color)
+(declaim (inline %ray-color-one)
+         (type (function (ray list (integer 1 *) (integer 1 4)) color) %ray-color-one))
+(defun %ray-color-one (ray world spatial-dimensions color-dimensions sky-color)
   (with-policy-expectations
       ((type ray ray)
        (type list world)
@@ -200,6 +202,55 @@
         (t
          sky-color)))))
 
+(declaim (inline %make-sample-ray)
+         (type (function (ray list list) ray) %make-sample-ray))
+(defun %make-sample-ray (ray pixel-deltas aspect-ratios)
+  (declare (ignorable aspect-ratios))
+  (with-policy-expectations
+      ((type ray ray)
+       (type list pixel-deltas aspect-ratios)
+       (returns ray))
+    (labels ((rnd ()
+               (- (random #.(vector-component 1))
+                  #.(vector-component 1/2)))
+             (scale (delta)
+               (let ((rr (rnd)))
+                 (or #+(or)
+                     delta
+                     (apply #'vec
+                            (vref delta 0)
+                            (loop :for ii :from 1
+                                  :for aa :in aspect-ratios
+                                  :collecting (* (vref delta ii)
+                                                 (/ rr
+                                                    aa))))))))
+      (with-ray (origin direction) ray
+        (ray origin
+             (loop :with sample-dir := direction
+                   :for delta :in pixel-deltas
+                   :for scaled-delta := (scale delta)
+                   :do (setf sample-dir (v+ sample-dir scaled-delta))
+                   :finally (return sample-dir)))))))
+
+(declaim (inline %ray-color)
+         (type (function (ray list (integer 1 *) (integer 1 4) (integer 1 *) list list) color) %ray-color))
+(defun %ray-color (ray world spatial-dimensions color-dimensions sky-color samples-per-pixel pixel-deltas aspect-ratios)
+  (with-policy-expectations
+      ((type ray ray)
+       (type list world pixel-deltas aspect-ratios)
+       (type (integer 1 *) spatial-dimensions samples-per-pixel)
+       (type (integer 1 4) color-dimensions)
+       (type color sky-color)
+       (returns color))
+    (flet ((get-color (ray)
+             (%ray-color-one ray world spatial-dimensions color-dimensions sky-color)))
+      (loop :for sample :from 1 :to samples-per-pixel
+            :for sample-ray := ray :then (%make-sample-ray ray pixel-deltas aspect-ratios)
+            :for color := (get-color sample-ray) :then (clerp color
+                                                              (get-color sample-ray)
+                                                              (/ #.(color-component 1) sample))
+            :finally (return color)))))
+
 (defun %make-sky-color (color-dimensions)
   (ecase color-dimensions
     (1
@@ -221,8 +272,9 @@
      sky-color)))
 
 (declaim (type (function (camera t &key (sky-color (or null color))) (array color-component-type *)) render))
-(defun render (camera world &key sky-color)
+(defun render (camera world &key sky-color (samples-per-pixel 1))
   (check-type camera camera)
+  (check-type samples-per-pixel (integer 1 *))
   (let* ((image-dimensions (%camera-image-dimensions camera))
          (spatial-dimensions (%camera-spatial-dimensions camera))
          (color-dimensions (%camera-color-dimensions camera))
@@ -237,6 +289,7 @@
            (viewport (%camera-viewport camera))
 
            (camera-center (%camera-center camera))
+           (aspect-ratios (%camera-aspect-ratios camera))
 
            (deltas (%make-viewport-deltas viewport spatial-dimensions))
            (pixel-deltas (%make-pixel-deltas deltas image-dimensions))
@@ -262,7 +315,10 @@
                                             world
                                             spatial-dimensions
                                             color-dimensions
-                                            sky-color)
+                                            sky-color
+                                            samples-per-pixel
+                                            pixel-deltas
+                                            aspect-ratios)
             :do (loop :with rmi := (apply #'array-row-major-index img ii)
                       :with cdims := (csize pixel-color)
                       :for jj :below color-dimensions

@@ -157,3 +157,24 @@ Where the ray intersects the spheres, the color is
     r = (/ (1+ (vref normal 1)) 2)
     g = (/ (1+ (vref normal 2)) 2)
     b = (/ (1+ (vref normal 0)) 2)
+
+### 1.8.2: Book 1, Chapter 8, Section 2: Generating Pixels With Multiple Samples
+
+This is essentially the same as image 1.7.1 above except with anti-aliasing.
+
+![Image cube](./images/B1C8-2image.png)
+
+You can generate this image with the following function:
+
+    (weekend-raytracer/examples:b1c8-2image samples-per-pixel &optional verticalp)
+
+The current anti-aliasing takes the aspect ratios into consideration when
+deciding how far to stray from the center ray of a pixel.
+Without this, the fact that some axises have hundreds of pixels along them
+and others only have a few pixels along them
+means that pixel cubes are really-long along some axises
+making it a great deal easier to hit or miss objects in some directions.
+That results in very fuzzy edges unless you bump the number of samples up by many orders of magnitude.
+
+This means the simulated camera has roughly (hyper)cubical sensors at each pixel
+but that the pixels are spaced out more on axises where there are fewer pixels per degree of view.

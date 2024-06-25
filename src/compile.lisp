@@ -3,7 +3,7 @@
 (in-package #:weekend-raytracer)
 
 (defmacro set-optimization-level ()
-  '(declaim (optimize (speed 3) (safety 3))))
+  '(declaim (optimize (speed 3) (safety 0))))
 
 (set-optimization-level)
 
