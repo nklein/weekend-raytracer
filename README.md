@@ -209,3 +209,15 @@ That results in very fuzzy edges unless you bump the number of samples up by man
 
 This means the simulated camera has roughly (hyper)cubical sensors at each pixel
 but that the pixels are spaced out more on axises where there are fewer pixels per degree of view.
+
+I have chosen a different method of creating random unit vectors as the rejection
+approach in the book rejects more often as the dimensions increase.
+
+### 1.9.2: Book 1, Chapter 9, Section 2: Limiting the Number of Child Rays
+
+The image rendered above in section 1.9.1 is no different than this.
+This just limits the depth of recursion.
+
+### 1.9.3: Book 1, Chapter 9, Section 3: Fixing Shadow Acne
+
+The image rendered above in section 1.9.1 already included this mechanism.

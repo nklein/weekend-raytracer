@@ -11,8 +11,7 @@ The optional parameter VERTICALP can be used to have the output image
 oriented so that the depth slices go down the image rather than across
 it.
 
-The color is based upon the camera ray direction's 3rd and 4th
-coordinates."
+The color is based upon the spheres being diffuse gray surfaces."
 
   (let* ((aspect-ratios '(1 16/9 64))
          (width 320)
@@ -28,7 +27,8 @@ coordinates."
                          :viewport viewport
                          :center center
                          :spatial-dimensions spatial-dimensions
-                         :color-dimensions color-dimensions)))
+                         :color-dimensions color-dimensions
+                         :max-depth 10)))
 
     (let* ((world (list (sphere (vec -1 0 0 1/32) 1/2)
                         (sphere (vec -1 0 -100.5 -1) 100)))

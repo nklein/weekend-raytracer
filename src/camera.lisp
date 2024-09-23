@@ -11,7 +11,8 @@
   (image-dimensions (error "Must specify IMAGE-DIMENSIONS") :type list :read-only t)
   (aspect-ratios (error "Must specify IMAGE-DIMENSIONS") :type list :read-only t)
   (viewport (error "Must specify VIEWPORT") :type list :read-only t)
-  (center (error "Must specify CENTER") :type vec :read-only t))
+  (center (error "Must specify CENTER") :type vec :read-only t)
+  (max-depth (error "Must specify MAX-DEPTH") :type (integer 0 *) :read-only t))
 
 (defun %default-aspect-ratios (spatial-dimensions)
   (list* 1
@@ -90,13 +91,15 @@
                  viewport
                  center
                  (spatial-dimensions (error "Must specify SPATIAL-DIMENSIONS"))
-                 (color-dimensions (error "Must specify COLOR-DIMENSIONS")))
+                 (color-dimensions (error "Must specify COLOR-DIMENSIONS"))
+                 (max-depth 50))
   (check-type width (integer 1 #.array-dimension-limit))
   (check-type aspect-ratios (or null real list))
   (check-type viewport (or null real list))
   (check-type center (or null vec))
   (check-type spatial-dimensions spatial-dimensions-type)
   (check-type color-dimensions color-dimensions-type)
+  (check-type max-depth (integer 0 *))
   (let* ((aspect-ratios (%ensure-aspect-ratios-list aspect-ratios spatial-dimensions))
          (viewport (%ensure-viewport-list viewport aspect-ratios))
          (center (%ensure-center center spatial-dimensions)))
@@ -113,7 +116,8 @@
                                   :image-dimensions image-dimensions
                                   :aspect-ratios aspect-ratios
                                   :viewport viewport
-                                  :center (apply #'vec (loop :repeat spatial-dimensions :collecting 0)))))
+                                  :center (apply #'vec (loop :repeat spatial-dimensions :collecting 0))
+                                  :max-depth max-depth)))
         camera))))
 
 (defun %make-viewport-deltas (viewport spatial-dimensions)
@@ -163,26 +167,43 @@
                 :for delta :in deltas
                 :collecting (v* delta index))))
 
-(declaim (type (function (ray list spatial-dimensions-type color-dimensions-type) color) %ray-color-one))
-(defun %ray-color-one (ray world spatial-dimensions color-dimensions sky-color)
+(declaim (inline %make-black))
+(defun %make-black (color-dimensions)
+  (ecase color-dimensions
+    (1
+     #.(color 0))
+    (2
+     #.(color 0 1))
+    (3
+     #.(color 0 0 0))
+    (4
+     #.(color 0 0 0 1))))
+
+(declaim (type (function (ray list spatial-dimensions-type (integer 0 *) color-dimensions-type) color) %ray-color-one))
+(defun %ray-color-one (ray world spatial-dimensions color-dimensions max-depth sky-color)
   (with-policy-expectations
       ((type ray ray)
        (type list world)
        (type spatial-dimensions-type spatial-dimensions)
        (type color-dimensions-type color-dimensions)
+       (type (integer 0 *) max-depth)
        (type color sky-color)
        (returns color))
-    (let ((hit (hit world ray (interval 1/10000 most-positive-fixnum))))
-      (cond
-        (hit
-         (let* ((full (to-full-hit hit))
-                (p (point full))
-                (n (normal full))
-                (new-dir (random-unit-vector-on-hemisphere n)))
-           (c* (%ray-color-one (ray p new-dir) world spatial-dimensions color-dimensions sky-color)
-               1/2)))
-        (t
-         sky-color)))))
+    (cond
+      ((plusp max-depth)
+       (let ((hit (hit world ray (interval 1/10000 most-positive-fixnum))))
+         (cond
+           (hit
+            (let* ((full (to-full-hit hit))
+                   (p (point full))
+                   (n (normal full))
+                   (new-dir (random-unit-vector-on-hemisphere n)))
+              (c* (%ray-color-one (ray p new-dir) world spatial-dimensions color-dimensions (1- max-depth) sky-color)
+                  1/2)))
+           (t
+            sky-color))))
+      (t
+       (%make-black color-dimensions)))))
 
 (declaim (inline %make-sample-ray)
          (type (function (ray list list) ray) %make-sample-ray))
@@ -215,17 +236,18 @@
                    :finally (return sample-dir)))))))
 
 (declaim (inline %ray-color)
-         (type (function (ray list spatial-dimensions-type color-dimensions-type spatial-dimensions-type list list) color) %ray-color))
-(defun %ray-color (ray world spatial-dimensions color-dimensions sky-color samples-per-pixel pixel-deltas aspect-ratios)
+         (type (function (ray list spatial-dimensions-type color-dimensions-type (integer 0 *) color (integer 1 *) list list) color) %ray-color))
+(defun %ray-color (ray world spatial-dimensions color-dimensions max-depth sky-color samples-per-pixel pixel-deltas aspect-ratios)
   (with-policy-expectations
       ((type ray ray)
        (type list world pixel-deltas aspect-ratios)
        (type spatial-dimensions-type spatial-dimensions samples-per-pixel)
        (type color-dimensions-type color-dimensions)
+       (type (integer 0 *) max-depth)
        (type color sky-color)
        (returns color))
     (flet ((get-color (ray)
-             (%ray-color-one ray world spatial-dimensions color-dimensions sky-color)))
+             (%ray-color-one ray world spatial-dimensions color-dimensions max-depth sky-color)))
       (loop :for sample :from 1 :to samples-per-pixel
             :for sample-ray := ray :then (%make-sample-ray ray pixel-deltas aspect-ratios)
             :for color := (get-color sample-ray) :then (clerp color
@@ -236,13 +258,13 @@
 (defun %make-sky-color (color-dimensions)
   (ecase color-dimensions
     (1
-     (color 1))
+     #.(color 1))
     (2
-     (color 1 1))
+     #.(color 1 1))
     (3
-     (color 1/2 1/2 1))
+     #.(color 1/2 1/2 1))
     (4
-     (color 1/2 1/2 1 1))))
+     #.(color 1/2 1/2 1 1))))
 
 (defun %ensure-sky-color (sky-color color-dimensions)
   (etypecase sky-color
@@ -260,6 +282,7 @@
   (let* ((image-dimensions (%camera-image-dimensions camera))
          (spatial-dimensions (%camera-spatial-dimensions camera))
          (color-dimensions (%camera-color-dimensions camera))
+         (max-depth (%camera-max-depth camera))
          (sky-color (%ensure-sky-color sky-color color-dimensions))
          (array-dimensions (append image-dimensions (list color-dimensions)))
          (img (make-array array-dimensions
@@ -297,6 +320,7 @@
                                             world
                                             spatial-dimensions
                                             color-dimensions
+                                            max-depth
                                             sky-color
                                             samples-per-pixel
                                             pixel-deltas
