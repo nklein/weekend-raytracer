@@ -197,7 +197,7 @@
             (let* ((full (to-full-hit hit))
                    (p (point full))
                    (n (normal full))
-                   (new-dir (random-unit-vector-on-hemisphere n)))
+                   (new-dir (v+ n (random-unit-vector spatial-dimensions))))
               (c* (%ray-color-one (ray p new-dir) world spatial-dimensions color-dimensions (1- max-depth) sky-color)
                   1/2)))
            (t
