@@ -84,7 +84,8 @@
                                (center (or null vec))
                                (viewport (or null real list))
                                (spatial-dimensions spatial-dimensions-type)
-                               (color-dimensions color-dimensions-type)) camera) camera))
+                               (color-dimensions color-dimensions-type)
+                               (max-depth (integer 1 *))) camera) camera))
 (defun camera (&key
                  (width (error "Must specify WIDTH"))
                  aspect-ratios

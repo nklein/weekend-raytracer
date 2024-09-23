@@ -170,6 +170,7 @@
                            height
                            border-width
                            border-color
+                           gamma
                            verbose)
   (with-policy-expectations
       ((type (array color-component-type *) array)
@@ -179,7 +180,9 @@
        (type fixnum cutoff)
        (type fixnum width height border-width)
        (type list border-color)
+       (type real gamma)
        (assertion (%valid-permutation-p permutation (1+ (length dimensions))))
+       (assertion (plusp gamma))
        (returns (or null
                     pathname)))
     (let ((png (make-instance 'zpng:pixel-streamed-png
@@ -191,7 +194,8 @@
                               :width width
                               :height height))
           (filename (merge-pathnames filename
-                                     (make-pathname :type "png"))))
+                                     (make-pathname :type "png")))
+          (1/gamma (/ gamma)))
       (with-policy-expectations
           ((type zpng:pixel-streamed-png png)
            (type pathname filename))
@@ -210,8 +214,12 @@
                         (append pixel (loop :repeat (- output-color-dimensions len) :collecting 1.0d0))))))
                  (clamp-pixel (pixel)
                    (mapcar #'clamp (resize-pixel pixel)))
+                 (gamma-correct-sample (s)
+                   (expt s 1/gamma))
+                 (gamma-correct-and-clamp-pixel (pixel)
+                   (clamp-pixel (mapcar #'gamma-correct-sample pixel)))
                  (output-pixel (pixel)
-                   (zpng:write-pixel (clamp-pixel pixel) png)))
+                   (zpng:write-pixel (gamma-correct-and-clamp-pixel pixel) png)))
           (with-open-file (stream filename
                                   :direction :output
                                   :if-exists :supersede
@@ -243,7 +251,8 @@
                       (border-color nil)
                       (permutation nil)
                       (cutoff nil)
-                      (verbose *verbose*))
+                      (verbose *verbose*)
+                      (gamma 1.0d0))
   "This function takes a FILENAME in which to write the image and an
 ARRAY of image pixel values.  The array can be any number of
 dimensions. The final dimension must either by 1, 2, 3, or 4 however.
@@ -268,6 +277,8 @@ leave this NIL or set it to (0 1 2 3 ...). The first CUTOFF permuted
 indices contribute to the width of the output image while the
 remaining pemuted indices contribute to teh height of the output
 image.
+
+The GAMMA is used to gamma correct the image samples.
 
 If VERBOSE is non-NIL, the writing will output progress information.
 The default value is taken from the *VERBOSE* special variable."
@@ -306,4 +317,5 @@ The default value is taken from the *VERBOSE* special variable."
                         :height height
                         :border-width border-width
                         :border-color border-color
+                        :gamma gamma
                         :verbose verbose))))
