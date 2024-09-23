@@ -27,3 +27,9 @@
       ((type real x)
        (returns color-component-type))
     (coerce x 'color-component-type)))
+
+(deftype spatial-dimensions-type () '(integer 1 *))
+(deftype spatial-dimension-index-type () '(integer 0 *))
+
+(deftype color-dimensions-type () '(integer 1 4))
+(deftype color-dimension-index-type () '(integer 0 3))

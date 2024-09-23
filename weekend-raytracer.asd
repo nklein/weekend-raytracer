@@ -15,12 +15,16 @@
                  (:file "compile" :depends-on ("package"))
                  (:file "types" :depends-on ("package"
                                              "compile"))
+                 (:file "box-muller" :depends-on ("package"
+                                                  "compile"
+                                                  "types"))
                  (:file "interval" :depends-on ("package"
                                                 "compile"
                                                 "types"))
                  (:file "vector" :depends-on ("package"
                                               "compile"
-                                              "types"))
+                                              "types"
+                                              "box-muller"))
                  (:file "ray" :depends-on ("package"
                                            "compile"
                                            "types"
@@ -73,7 +77,8 @@
                  (:file "B1C6-1image" :depends-on ("package"))
                  (:file "B1C6-7image" :depends-on ("package"))
                  (:file "B1C7-1image" :depends-on ("package"))
-                 (:file "B1C8-2image" :depends-on ("package"))))))
+                 (:file "B1C8-2image" :depends-on ("package"))
+                 (:file "B1C9-7image" :depends-on ("package"))))))
 
 (asdf:defsystem #:weekend-raytracer/test
   :description "Tests for the WEEKEND-RAYTRACER package."
@@ -89,6 +94,7 @@
    (:module "test"
     :components ((:file "package")
                  (:file "criteria" :depends-on ("package"))
+                 (:file "box-muller" :depends-on ("package"))
                  (:file "interval" :depends-on ("package"))
                  (:file "vector" :depends-on ("package"))
                  (:file "ray" :depends-on ("package"

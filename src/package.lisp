@@ -8,6 +8,8 @@
            #:vector-component
            #:color-component-type
            #:color-component)
+  (:export #:box-muller
+           #:reset-box-muller)
   (:export #:interval
            #:imin
            #:imax
@@ -23,6 +25,8 @@
            #:vlen^2
            #:vlen
            #:unit-vector
+           #:random-unit-vector
+           #:random-unit-vector-on-hemisphere
            #:v.
            #:mapv)
   (:export #:ray
@@ -46,7 +50,8 @@
   (:export #:color
            #:colorp
            #:cref
-           #:clerp)
+           #:clerp
+           #:c*)
   (:export #:camera
            #:render)
   (:export #:*verbose*

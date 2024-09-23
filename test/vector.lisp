@@ -50,3 +50,15 @@
 
   (nst:def-test v. (:equalp 10)
     (v. (vec 1 3) (vec -2 4))))
+
+(nst:def-test-group random-unit-vector-tests ()
+  (nst:def-test random-unit-vectors-are-unit-vectors (:equalp 100000)
+    (values (round (vlen (random-unit-vector 4))
+                   1/100000)))
+
+  (nst:def-test random-unit-vectors-on-hemisphere-are-on-hemisphere (:true)
+    (let ((normal (random-unit-vector 4)))
+      (every (lambda (vec)
+               (plusp (v. vec normal)))
+             (loop :repeat 50
+                   :collect (random-unit-vector-on-hemisphere normal))))))

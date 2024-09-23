@@ -7,6 +7,13 @@ raytracer from their [Raytracing in One Weekend Book Series][book].
 
 ## Examples
 
+Caveat: There are some functions that change/improve over the course of the book.
+Some of the images below will look different if rendered with newer versions
+of the software.
+
+All images up to section 1.9.1 should be generate-able with this
+software at revision `vB1C8`.
+
 ### 1.2.2: Book 1, Chapter 2, Section 2: Creating an Image File
 
 This implementation outputs PNG files rather than PPM files.
@@ -167,6 +174,30 @@ This is essentially the same as image 1.7.1 above except with anti-aliasing.
 You can generate this image with the following function:
 
     (weekend-raytracer/examples:b1c8-2image samples-per-pixel &optional verticalp)
+
+The current anti-aliasing takes the aspect ratios into consideration when
+deciding how far to stray from the center ray of a pixel.
+Without this, the fact that some axises have hundreds of pixels along them
+and others only have a few pixels along them
+means that pixel cubes are really-long along some axises
+making it a great deal easier to hit or miss objects in some directions.
+That results in very fuzzy edges unless you bump the number of samples up by many orders of magnitude.
+
+This means the simulated camera has roughly (hyper)cubical sensors at each pixel
+but that the pixels are spaced out more on axises where there are fewer pixels per degree of view.
+
+### 1.9.1: Book 1, Chapter 9, Section 1: A Simple Diffuse Material
+
+This is essentially the same as image 1.7.1 above except that it uses rays
+bounced off of the object to contribute to the object's color. The objects
+here are assumed to be gray objects with the bluish sky color cast upon
+them.
+
+![Image cube](./images/B1C9-7image.png)
+
+You can generate this image with the following function:
+
+    (weekend-raytracer/examples:b1c9-7image samples-per-pixel &optional verticalp)
 
 The current anti-aliasing takes the aspect ratios into consideration when
 deciding how far to stray from the center ray of a pixel.

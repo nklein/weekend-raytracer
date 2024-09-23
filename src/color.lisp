@@ -38,20 +38,20 @@
     (typep x 'color)))
 
 (declaim (inline cref)
-         (type (function (vec fixnum) color-component-type) cref))
+         (type (function (vec color-dimension-index-type) color-component-type) cref))
 (defun cref (color index)
   (with-policy-expectations
       ((type color color)
-       (type fixnum index)
+       (type color-dimension-index-type index)
        (returns color-component-type))
     (aref (%color-vals color) index)))
 
 (declaim (inline csize)
-         (type (function (color) (integer 0 #.(1- array-dimension-limit))) csize))
+         (type (function (color) color-dimensions-type) csize))
 (defun csize (color)
   (with-policy-expectations
       ((type color color)
-       (returns (integer 0 #.(1- array-dimension-limit))))
+       (returns color-dimensions-type))
     (array-dimension (%color-vals color) 0)))
 
 (declaim (inline clerp)
@@ -69,3 +69,14 @@
             (bv (%color-vals b)))
         (%color (loop :for ii :below (csize a)
                       :collecting (lerp (aref av ii) (aref bv ii))))))))
+
+(declaim (inline c*)
+         (type (function (color real) color) c*))
+(defun c* (a tt)
+  (with-policy-expectations
+      ((type color a)
+       (type real tt)
+       (returns color))
+    (let ((av (%color-vals a)))
+      (%color (loop :for ii :below (csize a)
+                    :collecting (* (aref av ii) tt))))))

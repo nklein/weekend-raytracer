@@ -4,9 +4,6 @@
 
 (set-optimization-level)
 
-(deftype spatial-dimensions-type () '(integer 1 *))
-(deftype color-dimensions-type () '(integer 1 4))
-
 (defstruct (camera (:conc-name %camera-)
                    (:constructor %make-camera))
   (spatial-dimensions (error "Must specify SPATIAL-DIMENSIONS") :type spatial-dimensions-type :read-only t)
@@ -166,39 +163,24 @@
                 :for delta :in deltas
                 :collecting (v* delta index))))
 
-(declaim (inline %ray-color-one)
-         (type (function (ray list (integer 1 *) (integer 1 4)) color) %ray-color-one))
+(declaim (type (function (ray list spatial-dimensions-type color-dimensions-type) color) %ray-color-one))
 (defun %ray-color-one (ray world spatial-dimensions color-dimensions sky-color)
   (with-policy-expectations
       ((type ray ray)
        (type list world)
-       (type (integer 1 *) spatial-dimensions)
-       (type (integer 1 4) color-dimensions)
+       (type spatial-dimensions-type spatial-dimensions)
+       (type color-dimensions-type color-dimensions)
        (type color sky-color)
        (returns color))
-    (let ((hit (hit world ray (interval 0 most-positive-fixnum))))
+    (let ((hit (hit world ray (interval 1/10000 most-positive-fixnum))))
       (cond
         (hit
-         (let ((n (normal (to-full-hit hit))))
-           (flet ((remap (ii)
-                    (cond
-                      ;; rotate the normal coordinates a bit for
-                      ;; prettier colors
-                      ((and (< ii 3)
-                            (<= 3 color-dimensions))
-                       (elt '(1 2 0) ii))
-                      (t
-                       ii)))
-                  (to-color (ii)
-                    (cond
-                      ((< ii spatial-dimensions)
-                       (/ (1+ (color-component (vref n ii)))
-                          #.(color-component 2)))
-                      (t
-                       #.(color-component 1)))))
-             (apply #'color (loop :for ii :below color-dimensions
-                                  :for jj := (remap ii)
-                                  :collecting (to-color jj))))))
+         (let* ((full (to-full-hit hit))
+                (p (point full))
+                (n (normal full))
+                (new-dir (random-unit-vector-on-hemisphere n)))
+           (c* (%ray-color-one (ray p new-dir) world spatial-dimensions color-dimensions sky-color)
+               1/2)))
         (t
          sky-color)))))
 
@@ -233,13 +215,13 @@
                    :finally (return sample-dir)))))))
 
 (declaim (inline %ray-color)
-         (type (function (ray list (integer 1 *) (integer 1 4) (integer 1 *) list list) color) %ray-color))
+         (type (function (ray list spatial-dimensions-type color-dimensions-type spatial-dimensions-type list list) color) %ray-color))
 (defun %ray-color (ray world spatial-dimensions color-dimensions sky-color samples-per-pixel pixel-deltas aspect-ratios)
   (with-policy-expectations
       ((type ray ray)
        (type list world pixel-deltas aspect-ratios)
-       (type (integer 1 *) spatial-dimensions samples-per-pixel)
-       (type (integer 1 4) color-dimensions)
+       (type spatial-dimensions-type spatial-dimensions samples-per-pixel)
+       (type color-dimensions-type color-dimensions)
        (type color sky-color)
        (returns color))
     (flet ((get-color (ray)
@@ -274,7 +256,7 @@
 (declaim (type (function (camera t &key (sky-color (or null color))) (array color-component-type *)) render))
 (defun render (camera world &key sky-color (samples-per-pixel 1))
   (check-type camera camera)
-  (check-type samples-per-pixel (integer 1 *))
+  (check-type samples-per-pixel spatial-dimensions-type)
   (let* ((image-dimensions (%camera-image-dimensions camera))
          (spatial-dimensions (%camera-spatial-dimensions camera))
          (color-dimensions (%camera-color-dimensions camera))

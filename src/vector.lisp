@@ -41,20 +41,20 @@
     (typep x 'vec)))
 
 (declaim (inline vref)
-         (type (function (vec fixnum) vector-component-type) vref))
+         (type (function (vec spatial-dimension-index-type) vector-component-type) vref))
 (defun vref (vec index)
   (with-policy-expectations
       ((type vec vec)
-       (type fixnum index)
+       (type spatial-dimension-index-type index)
        (returns vector-component-type))
     (aref (%vec-vals vec) index)))
 
 (declaim (inline vsize)
-         (type (function (vec) (integer 0 #.(1- array-dimension-limit))) vsize))
+         (type (function (vec) spatial-dimensions-type) vsize))
 (defun vsize (v)
   (with-policy-expectations
       ((type vec v)
-       (returns (integer 0 #.(1- array-dimension-limit))))
+       (returns spatial-dimensions-type))
     (array-dimension (%vec-vals v) 0)))
 
 (defmacro element-wise2 (fn a b)
@@ -181,6 +181,28 @@
       (setf (%vec-vlen^2 ret) (vector-component 1)
             (%vec-vlen ret) (vector-component 1))
       ret)))
+
+(declaim (inline random-unit-vector)
+         (type (function (spatial-dimensions-type) vec)))
+(defun random-unit-vector (spatial-dimensions)
+  (with-policy-expectations
+      ((type spatial-dimensions-type spatial-dimensions)
+       (returns vec))
+    (unit-vector (%vec (loop :repeat spatial-dimensions
+                             :collecting (box-muller))))))
+
+(declaim (inline random-unit-vector-on-hemisphere)
+         (type (function (vec) vec)))
+(defun random-unit-vector-on-hemisphere (normal)
+  (with-policy-expectations
+      ((type vec normal)
+       (returns vec))
+    (let ((spatial-dimensions (vsize normal)))
+      (let ((vec (unit-vector (%vec (loop :repeat spatial-dimensions
+                                          :collecting (box-muller))))))
+        (if (plusp (v. vec normal))
+            vec
+            (v* vec #.(vector-component -1)))))))
 
 (declaim (inline v.)
          (type (function (vec vec) vector-component-type) v.))
