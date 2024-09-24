@@ -45,21 +45,26 @@ If a RAY is returned, it is the a ray scattered from the surface at the point of
             (%lamb-albedo material))))
 
 (defstruct (metal (:conc-name %metal-)
-                       (:constructor %make-metal (albedo))
+                       (:constructor %make-metal (albedo fuzz))
                        (:include material))
-  (albedo (error "Must specify ALBEDO") :type color :read-only t))
+  (albedo (error "Must specify ALBEDO") :type color :read-only t)
+  (fuzz nil :type (or null color-component-type) :read-only t))
 
 (defmethod make-load-form ((object metal) &optional environment)
   (declare (ignore environment))
-  `(metal ,(%metal-albedo object)))
+  `(metal ,(%metal-albedo object)
+          ,(%metal-fuzz object)))
 
 (declaim (inline metal)
-         (type (function (color) metal) metal))
-(defun metal (albedo)
+         (type (function (color &optional real) metal) metal))
+(defun metal (albedo &optional fuzz)
   (with-policy-expectations
       ((type color albedo)
+       (type (or null real) fuzz)
        (returns metal))
-    (%make-metal albedo)))
+    (%make-metal albedo
+                 (when fuzz
+                   (color-component fuzz)))))
 
 (declaim (inline reflect)
          (type (function (vec vec) vec) reflect))
@@ -76,6 +81,22 @@ If a RAY is returned, it is the a ray scattered from the surface at the point of
   (let* ((p (point hit))
          (n (normal hit))
          (d (direction ray))
-         (sd (reflect d n)))
-    (values (ray p sd)
-            (%metal-albedo material))))
+         (sd (reflect d n))
+         (f (%metal-fuzz material)))
+    (flet ((reflected (sd)
+             (values (ray p sd)
+                     (%metal-albedo material)))
+           (absorbed ()
+             (values nil nil)))
+      (cond
+        (f
+         (let ((sd (v+ (unit-vector sd)
+                       (v* (random-unit-vector (vsize sd))
+                           f))))
+           (cond
+             ((plusp (v. sd n))
+              (reflected sd))
+             (t
+              (absorbed)))))
+        (t
+         (reflected sd))))))

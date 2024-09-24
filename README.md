@@ -251,3 +251,20 @@ with slightly different albedos and different w-direction offsets.
 You can generate this image with the following function:
 
     (weekend-raytracer/examples:b1c10-13image samples-per-pixel &optional verticalp)
+
+Note: this requires `vB1C10S5`.
+
+### 1.10.6: Book 1, Chapter 10, Section 6: Fuzzy Reflection
+
+This image contains a large yellow sphere for the ground (which ends up looking
+green because of the color of the sky); a small, diffuse blue sphere centered in the
+view (except offset slightly in the w-direction); and two mirrored spheres
+with slightly different albedos, different fuzziness, and different w-direction offsets.
+
+![Image cube](./images/B1C10-14image.png)
+
+You can generate this image with the following function:
+
+    (weekend-raytracer/examples:b1c10-14image samples-per-pixel &optional verticalp)
+
+Note: this requires `vB1C10`.
