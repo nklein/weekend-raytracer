@@ -25,6 +25,10 @@
                                               "compile"
                                               "types"
                                               "box-muller"))
+                 (:file "nullspace" :depends-on ("package"
+                                                 "compile"
+                                                 "types"
+                                                 "vector"))
                  (:file "ray" :depends-on ("package"
                                            "compile"
                                            "types"
@@ -113,6 +117,8 @@
                  (:file "box-muller" :depends-on ("package"))
                  (:file "interval" :depends-on ("package"))
                  (:file "vector" :depends-on ("package"))
+                 (:file "nullspace" :depends-on ("package"
+                                                 "criteria"))
                  (:file "ray" :depends-on ("package"
                                            "criteria"))
                  (:file "color" :depends-on ("package"))

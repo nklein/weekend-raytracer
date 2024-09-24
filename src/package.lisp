@@ -30,6 +30,8 @@
            #:v.
            #:mapv
            #:near-zero)
+  (:export #:find-orthogonal
+           #:full-span)
   (:export #:ray
            #:rayp
            #:origin
