@@ -289,3 +289,19 @@ sphere is very small compared to the shadow the sphere is casting as in the righ
 frame here.
 
 Note: this requires `vB1C11S2`.
+
+### 1.11.2: Book 1, Chapter 11, Section 3: Total Internal Reflection
+
+This image contains a large yellow sphere for the ground (which ends up looking
+green because of the color of the sky); a small, diffuse blue sphere centered in the
+view (except offset slightly in the w-direction); a fuzzily mirrored sphere on the
+right, and a refracting sphere on the left. The refracting sphere has an index of
+refraction less than that of the air and so is mostly reflecting.
+
+![Image cube](./images/B1C11-17image.png)
+
+You can generate this image with the following function:
+
+    (weekend-raytracer/examples:b1c11-17image samples-per-pixel &optional verticalp)
+
+Note: this requires `vB1C11S3`.
