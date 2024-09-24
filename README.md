@@ -268,3 +268,24 @@ You can generate this image with the following function:
     (weekend-raytracer/examples:b1c10-14image samples-per-pixel &optional verticalp)
 
 Note: this requires `vB1C10`.
+
+### 1.11.2: Book 1, Chapter 11, Section 2: Snell's Law
+
+This image contains a large yellow sphere for the ground (which ends up looking
+green because of the color of the sky); a small, diffuse blue sphere centered in the
+view (except offset slightly in the w-direction); a fuzzily mirrored sphere on the
+right, and a refracting sphere on the left.
+
+![Image cube](./images/B1C11-16image.png)
+
+You can generate this image with the following function:
+
+    (weekend-raytracer/examples:b1c11-16image samples-per-pixel &optional verticalp)
+
+Something that has been showing up in the images since 1.9.4 is that you can clearly
+see how the sphere blocks ambient light even in slices where the sphere is not
+present at all like in the leftmost frame here or when the visible portion of the
+sphere is very small compared to the shadow the sphere is casting as in the rightmost
+frame here.
+
+Note: this requires `vB1C11S2`.

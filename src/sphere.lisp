@@ -103,10 +103,7 @@
                                         (full-hit tt
                                                   front-face-p
                                                   point
-                                                  (if front-face-p
-                                                      normal
-                                                      (v* normal
-                                                          #.(vector-component -1)))
+                                                  normal
                                                   material))))
                                (partial-hit tt #'thunk)))))
                     (or (for-root (/ (- h sqrtd) a))

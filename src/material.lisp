@@ -100,3 +100,50 @@ If a RAY is returned, it is the a ray scattered from the surface at the point of
               (absorbed)))))
         (t
          (reflected sd))))))
+
+(defstruct (dialectric (:conc-name %de-)
+                       (:constructor %make-dialectric (albedo ior))
+                       (:include material))
+  (albedo (error "Must specify ALBEDO") :type color :read-only t)
+  (ior nil :type real :read-only t))
+
+(defmethod make-load-form ((object dialectric) &optional environment)
+  (declare (ignore environment))
+  `(dialectric ,(%de-albedo object)
+               ,(%de-ior object)))
+
+(declaim (inline dialectric)
+         (type (function (color real) dialectric) dialectric))
+(defun dialectric (albedo index-of-refraction)
+  (with-policy-expectations
+      ((type color albedo)
+       (type real index-of-refraction)
+       (returns dialectric))
+    (%make-dialectric albedo index-of-refraction)))
+
+(declaim (inline refract)
+         (type (function (vec vec real) vec) refract))
+(defun refract (uv n etai/etat)
+  (with-policy-expectations
+      ((type vec uv n)
+       (type real etai/etat)
+       (returns vec))
+    (let* ((cos-theta (min (v. uv n) 1.0d0))
+           (perp (v* (v+ uv (v* n cos-theta))
+                     etai/etat))
+           (parallel (v* n
+                         (vector-component (- (sqrt (abs (- #.(vector-component 1)
+                                                            (vlen^2 perp)))))))))
+      (v+ perp parallel))))
+
+(defmethod scatter ((material dialectric) (ray ray) (hit full-hit))
+  (let* ((p (point hit))
+         (n (normal hit))
+         (d (unit-vector (direction ray)))
+         (ior (%de-ior material))
+         (ri (if (front-face-p hit)
+                 (/ ior)
+                 ior))
+         (sd (refract d n ri)))
+    (values (ray p sd)
+            (%de-albedo material))))

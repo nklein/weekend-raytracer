@@ -58,7 +58,8 @@
            #:c*c)
   (:export #:material
            #:lambertian
-           #:metal)
+           #:metal
+           #:dialectric)
   (:export #:camera
            #:render)
   (:export #:*verbose*

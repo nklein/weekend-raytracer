@@ -178,8 +178,8 @@
       ((type vec vec)
        (returns vec))
     (let ((ret (v/ vec (vlen vec))))
-      (setf (%vec-vlen^2 ret) (vector-component 1)
-            (%vec-vlen ret) (vector-component 1))
+      (setf (%vec-vlen^2 ret) #.(vector-component 1)
+            (%vec-vlen ret) #.(vector-component 1))
       ret)))
 
 (declaim (inline random-unit-vector)
