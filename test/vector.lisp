@@ -62,3 +62,10 @@
                (plusp (v. vec normal)))
              (loop :repeat 50
                    :collect (random-unit-vector-on-hemisphere normal))))))
+
+(nst:def-test-group near-zero-tests ()
+  (nst:def-test zero-vec-is-near-zero (:true)
+    (near-zero (vec 0 0 0 0)))
+
+  (nst:def-test even-small-vec-is-not-near-zero (:not :true)
+    (near-zero (vec 0 0 1/10000 0))))

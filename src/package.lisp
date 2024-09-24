@@ -28,7 +28,8 @@
            #:random-unit-vector
            #:random-unit-vector-on-hemisphere
            #:v.
-           #:mapv)
+           #:mapv
+           #:near-zero)
   (:export #:ray
            #:rayp
            #:origin
@@ -42,16 +43,22 @@
            #:normal
            #:full-hit
            #:partial-hit
-           #:to-full-hit)
+           #:to-full-hit
+           #:hit-material)
   (:export #:sphere
            #:center
            #:radius
+           #:sphere-material
            #:with-sphere)
   (:export #:color
            #:colorp
            #:cref
            #:clerp
-           #:c*)
+           #:c*
+           #:c*c)
+  (:export #:material
+           #:lambertian
+           #:metal)
   (:export #:camera
            #:render)
   (:export #:*verbose*

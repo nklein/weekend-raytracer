@@ -10,8 +10,9 @@
   (direction (error "Must specify direction") :type vec :read-only t))
 
 (defmethod make-load-form ((object ray) &optional environment)
-  `(ray ,(make-load-form (%ray-origin object) environment)
-        ,(make-load-form (%ray-direction object) environment)))
+  (declare (ignore environment))
+  `(ray ,(%ray-origin object)
+        ,(%ray-direction object)))
 
 (declaim (inline ray)
          (type (function (vec vec) ray) ray))

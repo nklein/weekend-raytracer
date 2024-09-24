@@ -205,17 +205,6 @@ You can generate this image with the following function:
 
 Note: this requires version `vB1C9S3` of the camera to render as depicted here.
 
-The current anti-aliasing takes the aspect ratios into consideration when
-deciding how far to stray from the center ray of a pixel.
-Without this, the fact that some axises have hundreds of pixels along them
-and others only have a few pixels along them
-means that pixel cubes are really-long along some axises
-making it a great deal easier to hit or miss objects in some directions.
-That results in very fuzzy edges unless you bump the number of samples up by many orders of magnitude.
-
-This means the simulated camera has roughly (hyper)cubical sensors at each pixel
-but that the pixels are spaced out more on axises where there are fewer pixels per degree of view.
-
 I have chosen a different method of creating random unit vectors as the rejection
 approach in the book rejects more often as the dimensions increase.
 
@@ -239,20 +228,6 @@ You can generate this image with the following function:
 
     (weekend-raytracer/examples:b1c9-10image samples-per-pixel &optional verticalp)
 
-The current anti-aliasing takes the aspect ratios into consideration when
-deciding how far to stray from the center ray of a pixel.
-Without this, the fact that some axises have hundreds of pixels along them
-and others only have a few pixels along them
-means that pixel cubes are really-long along some axises
-making it a great deal easier to hit or miss objects in some directions.
-That results in very fuzzy edges unless you bump the number of samples up by many orders of magnitude.
-
-This means the simulated camera has roughly (hyper)cubical sensors at each pixel
-but that the pixels are spaced out more on axises where there are fewer pixels per degree of view.
-
-I have chosen a different method of creating random unit vectors as the rejection
-approach in the book rejects more often as the dimensions increase.
-
 ### 1.9.5: Book 1, Chapter 9, Section 5: Using Gamma Correction for Accurate Color Intensity
 
 This is essentially the same as image 1.9.4 above except that it uses gamma correction
@@ -264,16 +239,15 @@ You can generate this image with the following function:
 
     (weekend-raytracer/examples:b1c9-12image samples-per-pixel &optional verticalp)
 
-The current anti-aliasing takes the aspect ratios into consideration when
-deciding how far to stray from the center ray of a pixel.
-Without this, the fact that some axises have hundreds of pixels along them
-and others only have a few pixels along them
-means that pixel cubes are really-long along some axises
-making it a great deal easier to hit or miss objects in some directions.
-That results in very fuzzy edges unless you bump the number of samples up by many orders of magnitude.
+### 1.10.5: Book 1, Chapter 10, Section 5: Mirrored Light Reflection
 
-This means the simulated camera has roughly (hyper)cubical sensors at each pixel
-but that the pixels are spaced out more on axises where there are fewer pixels per degree of view.
+This image contains a large yellow sphere for the ground (which ends up looking
+green because of the color of the sky), a small, diffuse blue sphere centered in the
+view (except offset slightly in the w-direction), and two mirrored spheres
+with slightly different albedos and different w-direction offsets.
 
-I have chosen a different method of creating random unit vectors as the rejection
-approach in the book rejects more often as the dimensions increase.
+![Image cube](./images/B1C10-13image.png)
+
+You can generate this image with the following function:
+
+    (weekend-raytracer/examples:b1c10-13image samples-per-pixel &optional verticalp)

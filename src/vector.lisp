@@ -229,3 +229,17 @@
               'list
               ,func
               (mapcar #'%vec-vals ,vecs)))))
+
+(declaim (inline near-zero)
+         (type (function (vec) boolean)))
+(defun near-zero (vec)
+  (with-policy-expectations
+      ((type vec vec)
+       (returns boolean))
+    (loop :with epsilon := #.(vector-component 1/10000000)
+          :with ret := t
+          :while ret
+          :for ii :below (vsize vec)
+          :unless (< (- epsilon) (vref vec ii) epsilon)
+            :do (setf ret nil)
+          :finally (return ret))))

@@ -195,12 +195,20 @@
        (let ((hit (hit world ray (interval 1/10000 most-positive-fixnum))))
          (cond
            (hit
-            (let* ((full (to-full-hit hit))
-                   (p (point full))
-                   (n (normal full))
-                   (new-dir (v+ n (random-unit-vector spatial-dimensions))))
-              (c* (%ray-color-one (ray p new-dir) world spatial-dimensions color-dimensions (1- max-depth) sky-color)
-                  1/2)))
+            (let* ((hit (to-full-hit hit))
+                   (material (hit-material hit)))
+              (multiple-value-bind (scattered attenuation) (scatter material ray hit)
+                (cond
+                  (scattered
+                   (c*c (%ray-color-one scattered
+                                        world
+                                        spatial-dimensions
+                                        color-dimensions
+                                        (1- max-depth)
+                                        sky-color)
+                        attenuation))
+                  (t
+                   (%make-black color-dimensions))))))
            (t
             sky-color))))
       (t

@@ -80,3 +80,16 @@
     (let ((av (%color-vals a)))
       (%color (loop :for ii :below (csize a)
                     :collecting (* (aref av ii) tt))))))
+
+(declaim (inline c*c)
+         (type (function (color color) color) c*c))
+(defun c*c (a b)
+  (with-policy-expectations
+      ((type color a b)
+       (assertion (= (csize a) (csize b)))
+       (returns color))
+    (let ((av (%color-vals a))
+          (bv (%color-vals b)))
+      (%color (loop :for ii :below (csize a)
+                    :collecting (* (aref av ii)
+                                   (aref bv ii)))))))

@@ -5,25 +5,27 @@
 (set-optimization-level)
 
 (defstruct (sphere (:conc-name %sphere-)
-                   (:constructor %make-sphere (center radius radius^2)))
+                   (:constructor %make-sphere (center radius radius^2 material)))
   (center (error "Must specify CENTER") :type vec :read-only t)
   (radius (error "Must specify RADIUS") :type vector-component-type :read-only t)
-  (radius^2 (error "Must specify RADIUS^2") :type vector-component-type :read-only t))
+  (radius^2 (error "Must specify RADIUS^2") :type vector-component-type :read-only t)
+  (material (error "Must specify MATERIAL") :type material :read-only t))
 
 (defmethod make-load-form ((object sphere) &optional environment)
   (declare (ignore environment))
-  `(sphere ,(%sphere-center object) ,(%sphere-radius object)))
+  `(sphere ,(%sphere-center object) ,(%sphere-radius object) ,(%sphere-material object)))
 
 (declaim (inline sphere)
-         (type (function (list) sphere) sphere))
-(defun sphere (center radius)
+         (type (function (vec real material) sphere) sphere))
+(defun sphere (center radius material)
   (with-policy-expectations
       ((type vec center)
        (type real radius)
+       (type material material)
        (returns sphere))
     (let* ((r (vector-component radius))
            (r^2 (* r r)))
-      (%make-sphere center r r^2))))
+      (%make-sphere center r r^2 material))))
 
 (declaim (inline spherep)
          (type (function (t) boolean) spherep))
@@ -56,12 +58,21 @@
        (returns vector-component-type))
     (%sphere-radius^2 s)))
 
-(defmacro with-sphere ((center radius radius^2) sphere &body body)
+(declaim (inline sphere-material)
+         (type (function (sphere) material) sphere-material))
+(defun sphere-material (s)
+  (with-policy-expectations
+      ((type sphere s)
+       (returns material))
+    (%sphere-material s)))
+
+(defmacro with-sphere ((center radius radius^2 material) sphere &body body)
   (let ((ss (gensym "SS-")))
     `(let ((,ss ,sphere))
        (let ((,center (center ,ss))
              (,radius (radius ,ss))
-             (,radius^2 (radius^2 ,ss)))
+             (,radius^2 (radius^2 ,ss))
+             (,material (sphere-material ,ss)))
          ,@body))))
 
 (defmethod hit ((obj sphere) ray tinterval)
@@ -70,7 +81,7 @@
        (type ray ray)
        (type interval tinterval)
        (returns (or null partial-hit)))
-    (with-sphere (center radius radius^2) obj
+    (with-sphere (center radius radius^2 material) obj
       (with-ray (origin direction) ray
         (let ((oc (v- center origin)))
           (let ((a (vlen^2 direction))
@@ -95,7 +106,8 @@
                                                   (if front-face-p
                                                       normal
                                                       (v* normal
-                                                          #.(vector-component -1)))))))
+                                                          #.(vector-component -1)))
+                                                  material))))
                                (partial-hit tt #'thunk)))))
                     (or (for-root (/ (- h sqrtd) a))
                         (for-root (/ (+ h sqrtd) a)))))))))))))

@@ -1,10 +1,10 @@
-;;;; examples/B1C9-12image.lisp
+;;;; examples/B1C10-13image.lisp
 
 (in-package #:weekend-raytracer/examples)
 
 (set-optimization-level)
 
-(defun b1c9-12image (samples-per-pixel &optional verticalp)
+(defun b1c10-13image (samples-per-pixel &optional verticalp)
   "This example renders an image cube that is 320x180x5.
 
 The optional parameter VERTICALP can be used to have the output image
@@ -30,10 +30,16 @@ The color is true Lambertian scattering off of gray spheres with gamma correctio
                          :color-dimensions color-dimensions
                          :max-depth 10)))
 
-    (let* ((world (list (sphere (vec -1 0 0 1/32) 1/2)
-                        (sphere (vec -1 0 -100.5 -1) 100)))
+    (let* ((world (list (sphere (vec -1 0 0 1/32) 1/2
+                                (lambertian (color 1/10 2/10 5/10)))
+                        (sphere (vec -1 -1 0 0) 1/2
+                                (metal (color 8/10 8/10 8/10)))
+                        (sphere (vec -1  1 0  5/16) 1/2
+                                (metal (color 8/10 6/10 2/10)))
+                        (sphere (vec -1 0 -100.5 -1) 100
+                                (lambertian (color 8/10 8/10 0/10)))))
            (img (render camera world :samples-per-pixel samples-per-pixel)))
-    (write-image #P"B1C9-12image" img
+    (write-image #P"B1C10-13image" img
                  :border-width 2
                  :border-color (vector 0 0 0)
                  :permutation permutation

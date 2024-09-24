@@ -39,6 +39,13 @@
                                            "vector"
                                            "ray"
                                            "color"))
+                 (:file "material" :depends-on ("package"
+                                                "compile"
+                                                "types"
+                                                "vector"
+                                                "ray"
+                                                "color"
+                                                "hit"))
                  (:file "sphere" :depends-on ("package"
                                               "compile"
                                               "types"
@@ -80,7 +87,8 @@
                  (:file "B1C8-2image" :depends-on ("package"))
                  (:file "B1C9-7image" :depends-on ("package"))
                  (:file "B1C9-10image" :depends-on ("package"))
-                 (:file "B1C9-12image" :depends-on ("package"))))))
+                 (:file "B1C9-12image" :depends-on ("package"))
+                 (:file "B1C10-13image" :depends-on ("package"))))))
 
 (asdf:defsystem #:weekend-raytracer/test
   :description "Tests for the WEEKEND-RAYTRACER package."
@@ -96,6 +104,7 @@
    (:module "test"
     :components ((:file "package")
                  (:file "criteria" :depends-on ("package"))
+                 (:file "fixtures" :depends-on ("package"))
                  (:file "box-muller" :depends-on ("package"))
                  (:file "interval" :depends-on ("package"))
                  (:file "vector" :depends-on ("package"))
@@ -103,9 +112,11 @@
                                            "criteria"))
                  (:file "color" :depends-on ("package"))
                  (:file "hit" :depends-on ("package"
-                                           "criteria"))
+                                           "criteria"
+                                           "fixtures"))
                  (:file "sphere" :depends-on ("package"
-                                              "criteria"))
+                                              "criteria"
+                                              "fixtures"))
                  (:file "camera" :depends-on ("package"))
                  (:file "output" :depends-on ("package"))
                  (:file "run" :depends-on ("package"))))))

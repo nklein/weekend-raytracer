@@ -4,28 +4,34 @@
 
 (set-optimization-level)
 
+(defstruct hit)
+
 (defstruct (full-hit (:conc-name %full-hit-)
-                     (:constructor %make-full-hit (tt front-face-p point normal)))
+                     (:constructor %make-full-hit (tt front-face-p point normal material))
+                     (:include hit))
   (tt (error "Must provide TT") :type vector-component-type :read-only t)
   (front-face-p (error "Must provide FRONT-FACE") :type boolean :read-only t)
   (point (error "Must provide POINT") :type vec :read-only t)
-  (normal (error "Must provide NORMAL") :type vec :read-only t))
+  (normal (error "Must provide NORMAL") :type vec :read-only t)
+  (material (error "Must provide MATERIAL") :type material :read-only t))
 
 (declaim (inline full-hit)
-         (type (function (real boolean vec vec) full-hit) full-hit))
-(defun full-hit (tt front-face-p point normal)
+         (type (function (real boolean vec vec material) full-hit) full-hit))
+(defun full-hit (tt front-face-p point normal material)
   (with-policy-expectations
       ((type real tt)
        (type boolean front-face-p)
        (type vec point normal)
+       (type material material)
        (assertion (let ((scale 100000))
                     (= (round (vlen^2 normal) (/ scale))
                        scale)))
        (returns full-hit))
-    (%make-full-hit (vector-component tt) front-face-p point normal)))
+    (%make-full-hit (vector-component tt) front-face-p point normal material)))
 
 (defstruct (partial-hit (:conc-name %partial-hit-)
-                        (:constructor %make-partial-hit (tt thunk)))
+                        (:constructor %make-partial-hit (tt thunk))
+                        (:include hit))
   (tt (error "Must provide TT") :type vector-component-type :read-only t)
   (thunk (error "Must provide THUNK") :type (function () full-hit) :read-only t)
   (full-hit nil :type (or null full-hit)))
@@ -72,6 +78,14 @@
       ((type full-hit hit)
        (returns vec))
     (%full-hit-normal hit)))
+
+(declaim (inline hit-material)
+         (type (function (full-hit) material) hit-material))
+(defun hit-material (hit)
+  (with-policy-expectations
+      ((type full-hit hit)
+       (returns material))
+    (%full-hit-material hit)))
 
 (defgeneric tt (hit)
   (:method ((hit full-hit))
