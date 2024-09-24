@@ -4,6 +4,14 @@
 
 (set-optimization-level)
 
+(declaim (inline degrees-to-radians)
+         (type (function (real) vector-component-type) degrees-to-radians))
+(defun degrees-to-radians (deg)
+  (with-policy-expectations
+      ((type real deg)
+       (returns vector-component-type))
+    (vector-component (* deg (/ pi 180)))))
+
 (defstruct (camera (:conc-name %camera-)
                    (:constructor %make-camera))
   (spatial-dimensions (error "Must specify SPATIAL-DIMENSIONS") :type spatial-dimensions-type :read-only t)
@@ -12,7 +20,8 @@
   (aspect-ratios (error "Must specify IMAGE-DIMENSIONS") :type list :read-only t)
   (viewport (error "Must specify VIEWPORT") :type list :read-only t)
   (center (error "Must specify CENTER") :type vec :read-only t)
-  (max-depth (error "Must specify MAX-DEPTH") :type (integer 0 *) :read-only t))
+  (max-depth (error "Must specify MAX-DEPTH") :type (integer 0 *) :read-only t)
+  (field-of-view (error "Must specify FIELD-OF-VIEW") :type vector-component-type :read-only t))
 
 (defun %default-aspect-ratios (spatial-dimensions)
   (list* 1
@@ -85,7 +94,8 @@
                                (viewport (or null real list))
                                (spatial-dimensions spatial-dimensions-type)
                                (color-dimensions color-dimensions-type)
-                               (max-depth (integer 1 *))) camera) camera))
+                               (max-depth (integer 1 *))
+                               (field-of-view real)) camera) camera))
 (defun camera (&key
                  (width (error "Must specify WIDTH"))
                  aspect-ratios
@@ -93,7 +103,8 @@
                  center
                  (spatial-dimensions (error "Must specify SPATIAL-DIMENSIONS"))
                  (color-dimensions (error "Must specify COLOR-DIMENSIONS"))
-                 (max-depth 50))
+                 (max-depth 50)
+                 (field-of-view 90))
   (check-type width (integer 1 #.array-dimension-limit))
   (check-type aspect-ratios (or null real list))
   (check-type viewport (or null real list))
@@ -101,6 +112,7 @@
   (check-type spatial-dimensions spatial-dimensions-type)
   (check-type color-dimensions color-dimensions-type)
   (check-type max-depth (integer 0 *))
+  (check-type field-of-view real)
   (let* ((aspect-ratios (%ensure-aspect-ratios-list aspect-ratios spatial-dimensions))
          (viewport (%ensure-viewport-list viewport aspect-ratios))
          (center (%ensure-center center spatial-dimensions)))
@@ -118,17 +130,19 @@
                                   :aspect-ratios aspect-ratios
                                   :viewport viewport
                                   :center (apply #'vec (loop :repeat spatial-dimensions :collecting 0))
-                                  :max-depth max-depth)))
+                                  :max-depth max-depth
+                                  :field-of-view (degrees-to-radians field-of-view))))
         camera))))
 
-(defun %make-viewport-deltas (viewport spatial-dimensions)
+(defun %make-viewport-deltas (viewport fov-factor spatial-dimensions)
   (let ((zero-vec (loop :repeat spatial-dimensions :collecting 0)))
     (loop :for ii :below (1- spatial-dimensions)
-          :collecting (let ((ret (copy-seq zero-vec)))
+          :collecting (let ((ret (copy-seq zero-vec))
+                            (val (* (elt viewport ii) fov-factor)))
                         (setf (elt ret (1+ ii))
                               (if (evenp ii)
-                                  (elt viewport ii)
-                                  (- (elt viewport ii))))
+                                  val
+                                  (- val)))
                         (apply #'vec ret)))))
 
 (defun %make-pixel-deltas (deltas image-dimensions)
@@ -227,15 +241,13 @@
                   #.(vector-component 1/2)))
              (scale (delta)
                (let ((rr (rnd)))
-                 (or #+(or)
-                     delta
-                     (apply #'vec
-                            (vref delta 0)
-                            (loop :for ii :from 1
-                                  :for aa :in aspect-ratios
-                                  :collecting (* (vref delta ii)
-                                                 (/ rr
-                                                    aa))))))))
+                 (apply #'vec
+                        (vref delta 0)
+                        (loop :for ii :from 1
+                              :for aa :in aspect-ratios
+                              :collecting (* (vref delta ii)
+                                             (/ rr
+                                                aa)))))))
       (with-ray (origin direction) ray
         (ray origin
              (loop :with sample-dir := direction
@@ -302,10 +314,13 @@
 
            (viewport (%camera-viewport camera))
 
+           (field-of-view (%camera-field-of-view camera))
+           (fov-factor (* focal-length (tan (/ field-of-view 2))))
+
            (camera-center (%camera-center camera))
            (aspect-ratios (%camera-aspect-ratios camera))
 
-           (deltas (%make-viewport-deltas viewport spatial-dimensions))
+           (deltas (%make-viewport-deltas viewport fov-factor spatial-dimensions))
            (pixel-deltas (%make-pixel-deltas deltas image-dimensions))
 
            (viewport-upper-left (reduce #'v-

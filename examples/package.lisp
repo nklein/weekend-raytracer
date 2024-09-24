@@ -16,4 +16,5 @@
   (:export #:b1c10-14image)
   (:export #:b1c11-16image)
   (:export #:b1c11-17image)
-  (:export #:b1c11-18image))
+  (:export #:b1c11-18image)
+  (:export #:b1c12-19image))

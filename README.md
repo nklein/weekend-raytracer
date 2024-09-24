@@ -317,6 +317,17 @@ right, and a refracting sphere on the left. The refracting sphere is hollow.
 
 You can generate this image with the following function:
 
-    (weekend-raytracer/examples:b1c18-17image samples-per-pixel &optional verticalp)
+    (weekend-raytracer/examples:b1c11-18image samples-per-pixel &optional verticalp)
 
 Note: this requires `vB1C11`.
+
+### 1.12.1: Book 1, Chapter 12, Section 1: Camera Viewing Geometry
+
+This image contains two spheres which should take up the entire
+vertical field of view when the field of view is 90-degrees.
+
+![Image cube](./images/B1C12-19image.png)
+
+You can generate this image with the following function:
+
+    (weekend-raytracer/examples:b1c12-19image samples-per-pixel &optional verticalp)
