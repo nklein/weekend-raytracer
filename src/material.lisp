@@ -105,7 +105,7 @@ If a RAY is returned, it is the a ray scattered from the surface at the point of
                        (:constructor %make-dialectric (albedo ior))
                        (:include material))
   (albedo (error "Must specify ALBEDO") :type color :read-only t)
-  (ior nil :type real :read-only t))
+  (ior nil :type vector-component-type :read-only t))
 
 (defmethod make-load-form ((object dialectric) &optional environment)
   (declare (ignore environment))
@@ -119,7 +119,7 @@ If a RAY is returned, it is the a ray scattered from the surface at the point of
       ((type color albedo)
        (type real index-of-refraction)
        (returns dialectric))
-    (%make-dialectric albedo index-of-refraction)))
+    (%make-dialectric albedo (vector-component index-of-refraction))))
 
 (declaim (inline refract)
          (type (function (vec vec real) vec) refract))
@@ -136,6 +136,19 @@ If a RAY is returned, it is the a ray scattered from the surface at the point of
                                                             (vlen^2 perp)))))))))
       (v+ perp parallel))))
 
+(declaim (inline reflectance)
+         (type (function (vector-component-type vector-component-type) vector-component-type)))
+(defun reflectance (cos-theta ior)
+  (with-policy-expectations
+      ((type vector-component-type cos-theta ior)
+       (returns vector-component-type))
+    (let* ((one #.(vector-component 1))
+           (r0 (/ (- one ior) (+ one ior)))
+           (r0^2 (* r0 r0)))
+      (+ r0^2
+         (* (- one r0^2)
+            (vector-component (expt (- one cos-theta) 5)))))))
+
 (defmethod scatter ((material dialectric) (ray ray) (hit full-hit))
   (let* ((p (point hit))
          (n (normal hit))
@@ -147,7 +160,9 @@ If a RAY is returned, it is the a ray scattered from the surface at the point of
          (cos-theta (min (- (v. d n)) #.(vector-component 1)))
          (sin-theta (vector-component (sqrt (- #.(vector-component 1)
                                                (* cos-theta cos-theta))))))
-    (if (< #.(vector-component 1) (* ri sin-theta))
+    (if (or (< #.(vector-component 1) (* ri sin-theta))
+            (< (random #.(vector-component 1))
+               (reflectance cos-theta ri)))
         (values (ray p (reflect d n))
                 (%de-albedo material))
         (values (ray p (refract d n ri))

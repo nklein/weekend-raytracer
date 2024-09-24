@@ -305,3 +305,18 @@ You can generate this image with the following function:
     (weekend-raytracer/examples:b1c11-17image samples-per-pixel &optional verticalp)
 
 Note: this requires `vB1C11S3`.
+
+### 1.11.2: Book 1, Chapter 11, Section 5: Modelling A Hollow Sphere
+
+This image contains a large yellow sphere for the ground (which ends up looking
+green because of the color of the sky); a small, diffuse blue sphere centered in the
+view (except offset slightly in the w-direction); a fuzzily mirrored sphere on the
+right, and a refracting sphere on the left. The refracting sphere is hollow.
+
+![Image cube](./images/B1C11-18image.png)
+
+You can generate this image with the following function:
+
+    (weekend-raytracer/examples:b1c18-17image samples-per-pixel &optional verticalp)
+
+Note: this requires `vB1C11`.
