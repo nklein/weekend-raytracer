@@ -101,7 +101,7 @@
                  (:file "B1C12-19image" :depends-on ("package"))
                  (:file "B1C12-20image" :depends-on ("package"))
                  (:file "B1C12-21image" :depends-on ("package"))
-                 (:file "B1C12-22image" :depends-on ("package"))))))
+                 (:file "B1C13-22image" :depends-on ("package"))))))
 
 (asdf:defsystem #:weekend-raytracer/test
   :description "Tests for the WEEKEND-RAYTRACER package."

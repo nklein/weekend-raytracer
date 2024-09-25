@@ -364,6 +364,6 @@ right, and a refracting sphere on the left. The refracting sphere is hollow.
 
 You can generate this image with the following function:
 
-    (weekend-raytracer/examples:b1c12-22image samples-per-pixel &optional verticalp)
+    (weekend-raytracer/examples:b1c13-22image samples-per-pixel &optional verticalp)
 
-![Image cube](./images/B1C12-22image.png)
+![Image cube](./images/B1C13-22image.png)
