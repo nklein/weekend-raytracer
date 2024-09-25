@@ -23,7 +23,9 @@
   (lookat nil :type (or null vec) :read-only t)
   (orientation nil :type list :read-only t)
   (max-depth (error "Must specify MAX-DEPTH") :type (integer 0 *) :read-only t)
-  (field-of-view (error "Must specify FIELD-OF-VIEW") :type vector-component-type :read-only t))
+  (field-of-view (error "Must specify FIELD-OF-VIEW") :type vector-component-type :read-only t)
+  (focal-length (error "Must specify FOCAL-LENGTH") :type vector-component-type :read-only t)
+  (focus-radius (error "Must specify FOCUS-RADIUS") :type vector-component-type :read-only t))
 
 (defun %default-aspect-ratios (spatial-dimensions)
   (list* 1
@@ -110,7 +112,9 @@
                  (spatial-dimensions (error "Must specify SPATIAL-DIMENSIONS"))
                  (color-dimensions (error "Must specify COLOR-DIMENSIONS"))
                  (max-depth 50)
-                 (field-of-view 90))
+                 (field-of-view 90)
+                 (focal-length 1.0d0)
+                 (focus-angle nil))
   (check-type width (integer 1 #.array-dimension-limit))
   (check-type aspect-ratios (or null real list))
   (check-type viewport (or null real list))
@@ -121,6 +125,8 @@
   (check-type color-dimensions color-dimensions-type)
   (check-type max-depth (integer 0 *))
   (check-type field-of-view real)
+  (check-type focal-length real)
+  (check-type focus-angle (or null real))
   (let* ((aspect-ratios (%ensure-aspect-ratios-list aspect-ratios spatial-dimensions))
          (viewport (%ensure-viewport-list viewport aspect-ratios))
          (center (%ensure-center center spatial-dimensions)))
@@ -141,7 +147,13 @@
                                   :lookat lookat
                                   :orientation orientation
                                   :max-depth max-depth
-                                  :field-of-view (degrees-to-radians field-of-view))))
+                                  :field-of-view (degrees-to-radians field-of-view)
+                                  :focal-length (vector-component focal-length)
+                                  :focus-radius (if (null focus-angle)
+                                                    #.(vector-component 0)
+                                                    (vector-component (* focal-length
+                                                                         (tan (degrees-to-radians (/ focus-angle
+                                                                                                     2)))))))))
         camera))))
 
 (defun %make-viewport-deltas (viewport fov-factor camera-orientation)
@@ -230,12 +242,12 @@
        (%make-black color-dimensions)))))
 
 (declaim (inline %make-sample-ray)
-         (type (function (ray list list) ray) %make-sample-ray))
-(defun %make-sample-ray (ray pixel-deltas aspect-ratios)
-  (declare (ignorable aspect-ratios))
+         (type (function (ray list list real list) ray) %make-sample-ray))
+(defun %make-sample-ray (ray pixel-deltas aspect-ratios focus-radius camera-orientation)
   (with-policy-expectations
       ((type ray ray)
-       (type list pixel-deltas aspect-ratios)
+       (type list pixel-deltas aspect-ratios camera-orientation)
+       (type real focus-radius)
        (returns ray))
     (labels ((rnd ()
                (- (random #.(vector-component 1))
@@ -250,16 +262,28 @@
                                              (/ rr
                                                 aa)))))))
       (with-ray (origin direction) ray
-        (ray origin
-             (loop :with sample-dir := direction
-                   :for delta :in pixel-deltas
-                   :for scaled-delta := (scale delta)
-                   :do (setf sample-dir (v+ sample-dir scaled-delta))
-                   :finally (return sample-dir)))))))
+        (let ((new-origin (cond
+                            ((plusp focus-radius)
+                             (let ((offset (second (orthogonalize
+                                                    (list (first camera-orientation)
+                                                          (v* (random-unit-vector (vsize origin))
+                                                              focus-radius))))))
+                               (v+ origin offset)))
+                            (t
+                             origin))))
+          (ray new-origin
+               (loop :with sample-dir := direction
+                     :for delta :in pixel-deltas
+                     :for scaled-delta := (scale delta)
+                     :do (setf sample-dir (v+ sample-dir scaled-delta))
+                     :finally (return (if (eql origin new-origin)
+                                          sample-dir
+                                          (v+ sample-dir
+                                              (v- origin new-origin)))))))))))
 
 (declaim (inline %ray-color)
-         (type (function (ray list spatial-dimensions-type color-dimensions-type (integer 0 *) color (integer 1 *) list list) color) %ray-color))
-(defun %ray-color (ray world spatial-dimensions color-dimensions max-depth sky-color samples-per-pixel pixel-deltas aspect-ratios)
+         (type (function (ray list spatial-dimensions-type color-dimensions-type (integer 0 *) color (integer 1 *) list list real list) color) %ray-color))
+(defun %ray-color (ray world spatial-dimensions color-dimensions max-depth sky-color samples-per-pixel pixel-deltas aspect-ratios focus-radius camera-orientation)
   (with-policy-expectations
       ((type ray ray)
        (type list world pixel-deltas aspect-ratios)
@@ -267,11 +291,14 @@
        (type color-dimensions-type color-dimensions)
        (type (integer 0 *) max-depth)
        (type color sky-color)
+       (type real focus-radius)
+       (type list camera-orientation)
        (returns color))
     (flet ((get-color (ray)
              (%ray-color-one ray world spatial-dimensions color-dimensions max-depth sky-color)))
       (loop :for sample :from 1 :to samples-per-pixel
-            :for sample-ray := ray :then (%make-sample-ray ray pixel-deltas aspect-ratios)
+            :for sample-ray := ray :then (%make-sample-ray ray pixel-deltas aspect-ratios
+                                                           focus-radius camera-orientation)
             :for color := (get-color sample-ray) :then (clerp color
                                                               (get-color sample-ray)
                                                               (/ #.(color-component 1) sample))
@@ -315,7 +342,8 @@
                           :element-type 'color-component-type
                           :initial-element (color-component 0))))
 
-    (let* ((focal-length 1.0d0)
+    (let* ((focal-length (%camera-focal-length camera))
+           (focus-radius (%camera-focus-radius camera))
 
            (viewport (%camera-viewport camera))
 
@@ -359,7 +387,9 @@
                                             sky-color
                                             samples-per-pixel
                                             pixel-deltas
-                                            aspect-ratios)
+                                            aspect-ratios
+                                            focus-radius
+                                            camera-orientation)
             :do (loop :with rmi := (apply #'array-row-major-index img ii)
                       :with cdims := (csize pixel-color)
                       :for jj :below color-dimensions

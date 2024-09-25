@@ -332,7 +332,7 @@ You can generate this image with the following function:
 
     (weekend-raytracer/examples:b1c12-19image samples-per-pixel &optional verticalp)
 
-### 1.12.1: Book 1, Chapter 12, Section 2: Positioning and Orienting the Camera
+### 1.12.2: Book 1, Chapter 12, Section 2: Positioning and Orienting the Camera
 
 These images contain a large yellow sphere for the ground (which ends up looking
 green because of the color of the sky); a small, diffuse blue sphere centered in the
@@ -354,3 +354,16 @@ This is the image with a 20-degree field of view:
 You can generate this image with the following function:
 
     (weekend-raytracer/examples:b1c12-21image samples-per-pixel &optional verticalp)
+
+### 1.13.2: Book 1, Chapter 13: Defocus Blur
+
+These images contain a large yellow sphere for the ground (which ends up looking
+green because of the color of the sky); a small, diffuse blue sphere centered in the
+view (except offset slightly in the w-direction); a fuzzily mirrored sphere on the
+right, and a refracting sphere on the left. The refracting sphere is hollow.
+
+You can generate this image with the following function:
+
+    (weekend-raytracer/examples:b1c12-22image samples-per-pixel &optional verticalp)
+
+![Image cube](./images/B1C12-22image.png)
