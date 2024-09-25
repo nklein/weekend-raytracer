@@ -20,6 +20,8 @@
   (aspect-ratios (error "Must specify IMAGE-DIMENSIONS") :type list :read-only t)
   (viewport (error "Must specify VIEWPORT") :type list :read-only t)
   (center (error "Must specify CENTER") :type vec :read-only t)
+  (lookat nil :type (or null vec) :read-only t)
+  (orientation nil :type list :read-only t)
   (max-depth (error "Must specify MAX-DEPTH") :type (integer 0 *) :read-only t)
   (field-of-view (error "Must specify FIELD-OF-VIEW") :type vector-component-type :read-only t))
 
@@ -92,6 +94,8 @@
                                (aspect-ratios (or null real list))
                                (center (or null vec))
                                (viewport (or null real list))
+                               (lookat (or null vec))
+                               (orientation list)
                                (spatial-dimensions spatial-dimensions-type)
                                (color-dimensions color-dimensions-type)
                                (max-depth (integer 1 *))
@@ -101,6 +105,8 @@
                  aspect-ratios
                  viewport
                  center
+                 lookat
+                 orientation
                  (spatial-dimensions (error "Must specify SPATIAL-DIMENSIONS"))
                  (color-dimensions (error "Must specify COLOR-DIMENSIONS"))
                  (max-depth 50)
@@ -109,6 +115,8 @@
   (check-type aspect-ratios (or null real list))
   (check-type viewport (or null real list))
   (check-type center (or null vec))
+  (check-type lookat (or null vec))
+  (check-type orientation list)
   (check-type spatial-dimensions spatial-dimensions-type)
   (check-type color-dimensions color-dimensions-type)
   (check-type max-depth (integer 0 *))
@@ -129,31 +137,24 @@
                                   :image-dimensions image-dimensions
                                   :aspect-ratios aspect-ratios
                                   :viewport viewport
-                                  :center (apply #'vec (loop :repeat spatial-dimensions :collecting 0))
+                                  :center center
+                                  :lookat lookat
+                                  :orientation orientation
                                   :max-depth max-depth
                                   :field-of-view (degrees-to-radians field-of-view))))
         camera))))
 
-(defun %make-viewport-deltas (viewport fov-factor spatial-dimensions)
-  (let ((zero-vec (loop :repeat spatial-dimensions :collecting 0)))
-    (loop :for ii :below (1- spatial-dimensions)
-          :collecting (let ((ret (copy-seq zero-vec))
-                            (val (* (elt viewport ii) fov-factor)))
-                        (setf (elt ret (1+ ii))
-                              (if (evenp ii)
-                                  val
-                                  (- val)))
-                        (apply #'vec ret)))))
+(defun %make-viewport-deltas (viewport fov-factor camera-orientation)
+  (loop :for oo :in (rest camera-orientation)
+        :for vv :in viewport
+        :for kk :from 0
+        :collecting (let ((factor (* fov-factor vv)))
+                      (v* oo (if (evenp kk) factor (- factor))))))
 
 (defun %make-pixel-deltas (deltas image-dimensions)
   (loop :for ww :in image-dimensions
         :for dd :in deltas
         :collecting (v/ dd ww)))
-
-(defun %make-focal-length-vec (focal-length spatial-dimensions)
-  (apply #'vec focal-length
-         (loop :repeat (1- spatial-dimensions)
-               :collecting 0)))
 
 (defun %increment-indexes (indexes maxes &optional (by 1))
   (labels ((inc (indexes maxes)
@@ -296,6 +297,10 @@
                  (= (1+ (csize sky-color)) color-dimensions)))
      sky-color)))
 
+(defun %ensure-camera-orientation (center lookat vecs)
+  (mapcar #'unit-vector
+          (full-span (orthogonalize (list* (v- lookat center) vecs)))))
+
 (declaim (type (function (camera t &key (sky-color (or null color))) (array color-component-type *)) render))
 (defun render (camera world &key sky-color (samples-per-pixel 1))
   (check-type camera camera)
@@ -318,14 +323,19 @@
            (fov-factor (* focal-length (tan (/ field-of-view 2))))
 
            (camera-center (%camera-center camera))
+           (camera-lookat (or (%camera-lookat camera)
+                              (apply #'vec 1 (loop :repeat (1- spatial-dimensions) :collecting 0))))
            (aspect-ratios (%camera-aspect-ratios camera))
 
-           (deltas (%make-viewport-deltas viewport fov-factor spatial-dimensions))
+           (camera-orientation (%ensure-camera-orientation camera-center
+                                                           camera-lookat
+                                                           (%camera-orientation camera)))
+
+           (deltas (%make-viewport-deltas viewport fov-factor camera-orientation))
            (pixel-deltas (%make-pixel-deltas deltas image-dimensions))
 
            (viewport-upper-left (reduce #'v-
-                                        (list* camera-center
-                                               (%make-focal-length-vec focal-length spatial-dimensions)
+                                        (list* (v+ camera-center (v* (first camera-orientation) focal-length))
                                                (mapcar (lambda (v)
                                                          (v/ v 2))
                                                        deltas))))
@@ -336,6 +346,7 @@
 
       (loop :for ii := indexes :then (%increment-indexes indexes array-dimensions color-dimensions)
             :while ii
+            :for pixel :from 0
             :for loc := (v+ pixel-origin
                             (%calculate-indexed-delta ii pixel-deltas))
             :for ray-direction := (v- loc camera-center)

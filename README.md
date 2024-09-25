@@ -331,3 +331,26 @@ vertical field of view when the field of view is 90-degrees.
 You can generate this image with the following function:
 
     (weekend-raytracer/examples:b1c12-19image samples-per-pixel &optional verticalp)
+
+### 1.12.1: Book 1, Chapter 12, Section 2: Positioning and Orienting the Camera
+
+These images contain a large yellow sphere for the ground (which ends up looking
+green because of the color of the sky); a small, diffuse blue sphere centered in the
+view (except offset slightly in the w-direction); a fuzzily mirrored sphere on the
+right, and a refracting sphere on the left. The refracting sphere is hollow.
+
+This is the image with a 90-degree field of view:
+
+![Image cube](./images/B1C12-20image.png)
+
+You can generate this image with the following function:
+
+    (weekend-raytracer/examples:b1c12-20image samples-per-pixel &optional verticalp)
+
+This is the image with a 20-degree field of view:
+
+![Image cube](./images/B1C12-21image.png)
+
+You can generate this image with the following function:
+
+    (weekend-raytracer/examples:b1c12-21image samples-per-pixel &optional verticalp)
