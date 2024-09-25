@@ -14,6 +14,9 @@
   (declare (ignore environment))
   `(vec ,@(map 'list #'identity (%vec-vals object))))
 
+(defmethod print-object ((vv vec) stream)
+  (format stream "~A" (make-load-form vv)))
+
 (declaim (inline %vec)
          (type (function (list) vec) %vec))
 (defun %vec (vals)

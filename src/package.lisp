@@ -17,6 +17,7 @@
            #:surroundsp)
   (:export #:vec
            #:vecp
+           #:vsize
            #:vref
            #:v+
            #:v-
@@ -31,7 +32,8 @@
            #:mapv
            #:near-zero)
   (:export #:find-orthogonal
-           #:full-span)
+           #:full-span
+           #:orthogonalize)
   (:export #:ray
            #:rayp
            #:origin
