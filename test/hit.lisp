@@ -2,14 +2,14 @@
 
 (in-package #:weekend-raytracer/test)
 
-(nst:def-test-group full-hit-construction-tests (materials)
+(nst:def-test-group full-hit-construction-tests (materials-fixture)
   (nst:def-test can-construct-a-full-hit (:true)
     (full-hit 3 t (vec 1 2 3) (vec 1 0 0) blue-diffuse))
 
   (nst:def-test constructor-raises-error-if-normal-not-unit-vector (:err)
     (full-hit 3 t (vec 1 2 3) (vec 1 1 0) blue-diffuse)))
 
-(nst:def-test-group full-hit-accessor-tests (materials)
+(nst:def-test-group full-hit-accessor-tests (materials-fixture)
   (nst:def-test can-get-tt-from-full-hit (:equalp #.(vector-component 3))
     (tt (full-hit 3 t (vec 1 2 3) (vec 1 0 0) blue-diffuse)))
 
@@ -27,14 +27,14 @@
   (nst:def-test can-get-material-from-full-hit (:eql blue-diffuse)
     (hit-material (full-hit 3 t (vec 1 2 3) (vec 1 0 0) blue-diffuse))))
 
-(nst:def-test-group partial-hit-construction-tests (materials)
+(nst:def-test-group partial-hit-construction-tests (materials-fixture)
   (nst:def-test can-construct-a-partial-hit (:true)
     (let ((tt 3))
       (flet ((thunk ()
                (full-hit tt t (vec 1 2 3) (vec 1 0 0) blue-diffuse)))
         (partial-hit tt #'thunk)))))
 
-(nst:def-test-group partial-hit-accessor-tests (materials)
+(nst:def-test-group partial-hit-accessor-tests (materials-fixture)
   (nst:def-test can-get-tt-from-partial-hit (:equalp #.(vector-component 3))
     (let ((tt 3))
       (flet ((thunk ()
@@ -58,7 +58,7 @@
           (to-full-hit hit)
           cntr)))))
 
-(nst:def-test-group hit-list-of-objects-tests (materials)
+(nst:def-test-group hit-list-of-objects-tests (materials-fixture)
   (nst:def-test misses-empty-list (:equalp nil)
     (hit nil
          (ray (vec 0) (vec 1))

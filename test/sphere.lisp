@@ -2,17 +2,14 @@
 
 (in-package #:weekend-raytracer/test)
 
-(nst:def-fixtures materials ()
-  (lambertian (lambertian (color 1 1 1/2))))
-
-(nst:def-test-group sphere-construction-tests (materials)
+(nst:def-test-group sphere-construction-tests (materials-fixture)
   (nst:def-test can-construct-a-sphere (:true)
     (sphere (vec 1 2 3) 4 blue-diffuse))
 
   (nst:def-test can-load-a-sphere (:true)
     #.(sphere (vec 1 2 3) 4 (lambertian (color 1 1 1/2)))))
 
-(nst:def-test-group sphere-intersection-tests (materials)
+(nst:def-test-group sphere-intersection-tests (materials-fixture)
   (nst:def-test can-intersect-sphere-from-outside (:true)
     (hit (sphere (vec 4 5) 3 blue-diffuse)
          (ray (vec 4 -1)
