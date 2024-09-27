@@ -65,6 +65,8 @@
            #:metal
            #:dialectric)
   (:export #:camera
-           #:render)
+           #:render
+           #:increment-indexes
+           #+bordeaux-threads #:*render-threads*)
   (:export #:*verbose*
            #:write-image))

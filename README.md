@@ -367,3 +367,12 @@ You can generate this image with the following function:
     (weekend-raytracer/examples:b1c13-22image samples-per-pixel &optional verticalp)
 
 ![Image cube](./images/B1C13-22image.png)
+
+### 1.14.1: Book 1, Chapter 14, Section 1: A Final Render
+
+You can generate this image with the following function:
+
+    (let ((weekend-raytracer:*render-threads* 4))
+      (weekend-raytracer/examples:b1c14-23image samples-per-pixel &optional verticalp))
+
+![Image cube](./images/B1C14-23image.png)

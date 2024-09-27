@@ -2,6 +2,9 @@
 
 (in-package #:weekend-raytracer)
 
+#+bordeaux-threads
+(defvar *render-threads* 1)
+
 (set-optimization-level)
 
 (declaim (inline degrees-to-radians)
@@ -168,7 +171,7 @@
         :for dd :in deltas
         :collecting (v/ dd ww)))
 
-(defun %increment-indexes (indexes maxes &optional (by 1))
+(defun increment-indexes (indexes maxes &optional (by 1))
   (labels ((inc (indexes maxes)
              (when indexes
                (cond
@@ -219,7 +222,7 @@
        (returns color))
     (cond
       ((plusp max-depth)
-       (let ((hit (hit world ray (interval 1/10000 most-positive-fixnum))))
+       (let ((hit (hit world ray (interval 1/5000 most-positive-fixnum))))
          (cond
            (hit
             (let* ((hit (to-full-hit hit))
@@ -329,7 +332,9 @@
           (full-span (orthogonalize (list* (v- lookat center) vecs)))))
 
 (declaim (type (function (camera t &key (sky-color (or null color))) (array color-component-type *)) render))
-(defun render (camera world &key sky-color (samples-per-pixel 1))
+(defun render (camera world &key sky-color (samples-per-pixel 1)
+                              (threads (or #+bordeaux-threads *render-threads*
+                                           1)))
   (check-type camera camera)
   (check-type samples-per-pixel spatial-dimensions-type)
   (let* ((image-dimensions (%camera-image-dimensions camera))
@@ -370,32 +375,62 @@
            (pixel-origin (v+ viewport-upper-left
                              (v/ (reduce #'v+ pixel-deltas)
                                  2)))
-           (indexes (loop :repeat spatial-dimensions :collecting 0)))
+           (indexes (loop :repeat spatial-dimensions :collecting 0))
+           (done nil))
 
-      (loop :for ii := indexes :then (%increment-indexes indexes array-dimensions color-dimensions)
-            :while ii
-            :for pixel :from 0
-            :for loc := (v+ pixel-origin
-                            (%calculate-indexed-delta ii pixel-deltas))
-            :for ray-direction := (v- loc camera-center)
-            :for ray := (ray camera-center ray-direction)
-            :for pixel-color := (%ray-color ray
-                                            world
-                                            spatial-dimensions
-                                            color-dimensions
-                                            max-depth
-                                            sky-color
-                                            samples-per-pixel
-                                            pixel-deltas
-                                            aspect-ratios
-                                            focus-radius
-                                            camera-orientation)
-            :do (loop :with rmi := (apply #'array-row-major-index img ii)
-                      :with cdims := (csize pixel-color)
-                      :for jj :below color-dimensions
-                      :do (setf (row-major-aref img (+ rmi jj))
-                                (if (< jj cdims)
-                                    (cref pixel-color jj)
-                                    #.(color-component 1)))))
-
+      (flet ((render-part (indexes maxes &optional verbose)
+               (loop :with index-offset := (first indexes)
+                     :with last-start-index := index-offset
+                     :for ii := indexes :then (increment-indexes indexes maxes color-dimensions)
+                     :while ii
+                     :until done
+                     :for pixel :from 0
+                     :for loc := (v+ pixel-origin
+                                     (%calculate-indexed-delta ii pixel-deltas))
+                     :for ray-direction := (v- loc camera-center)
+                     :for ray := (ray camera-center ray-direction)
+                     :for pixel-color := (%ray-color ray
+                                                     world
+                                                     spatial-dimensions
+                                                     color-dimensions
+                                                     max-depth
+                                                     sky-color
+                                                     samples-per-pixel
+                                                     pixel-deltas
+                                                     aspect-ratios
+                                                     focus-radius
+                                                     camera-orientation)
+                     :when (and verbose
+                                (/= last-start-index (first ii)))
+                       :do (prog1
+                               (setf last-start-index (first ii))
+                             (format *debug-io* "~6,2,,0F% done~%" (/ (* 100.0d0 (- (first ii)
+                                                                                    index-offset))
+                                                                      (- (first maxes)
+                                                                         index-offset))))
+                     :do (loop :with rmi := (apply #'array-row-major-index img ii)
+                               :with cdims := (csize pixel-color)
+                               :for jj :below color-dimensions
+                               :do (setf (row-major-aref img (+ rmi jj))
+                                         (if (< jj cdims)
+                                             (cref pixel-color jj)
+                                             #.(color-component 1)))))
+               indexes))
+        (let* ((total-lines (first array-dimensions))
+               (lines-per-thread (ceiling total-lines threads))
+               (work (loop :for start :below total-lines :by lines-per-thread
+                           :collecting (let ((ss (copy-seq indexes))
+                                             (mm (copy-seq array-dimensions)))
+                                         (setf (first ss) start
+                                               (first mm) (min total-lines
+                                                               (+ start lines-per-thread)))
+                                         (format *debug-io* "Rendering ~A to ~A~%" ss mm)
+                                         (lambda ()
+                                           (let ((*box-muller-state* nil))
+                                             (render-part ss mm (zerop (first ss)))))))))
+          (unwind-protect
+               (or #+bordeaux-threads
+                   (mapcar #'bt:join-thread (mapcar #'bt:make-thread work))
+                   (mapcar #'funcall work))
+            (setf done t))))
       img)))

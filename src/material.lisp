@@ -45,8 +45,8 @@ If a RAY is returned, it is the a ray scattered from the surface at the point of
             (%lamb-albedo material))))
 
 (defstruct (metal (:conc-name %metal-)
-                       (:constructor %make-metal (albedo fuzz))
-                       (:include material))
+                  (:constructor %make-metal (albedo fuzz))
+                  (:include material))
   (albedo (error "Must specify ALBEDO") :type color :read-only t)
   (fuzz nil :type (or null color-component-type) :read-only t))
 

@@ -5,7 +5,7 @@
   :author "Patrick Stein <pat@nklein.com>"
   :license "UNLICENSE"
   :version "0.3.20240614"
-  :depends-on (#:policy-cond #:zpng)
+  :depends-on (#:policy-cond #:zpng #:bordeaux-threads)
   :in-order-to ((asdf:test-op (asdf:test-op :weekend-raytracer/test)))
   :components
   ((:static-file "README.md")
@@ -101,7 +101,8 @@
                  (:file "B1C12-19image" :depends-on ("package"))
                  (:file "B1C12-20image" :depends-on ("package"))
                  (:file "B1C12-21image" :depends-on ("package"))
-                 (:file "B1C13-22image" :depends-on ("package"))))))
+                 (:file "B1C13-22image" :depends-on ("package"))
+                 (:file "B1C14-23image" :depends-on ("package"))))))
 
 (asdf:defsystem #:weekend-raytracer/test
   :description "Tests for the WEEKEND-RAYTRACER package."
