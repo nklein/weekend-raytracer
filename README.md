@@ -14,6 +14,11 @@ of the software.
 All images up to section 1.9.1 should be generate-able with this
 software at revision `vB1C8`.
 
+However, I have also moved the examples up so they still compile with
+the current version. You just end up with different images. If you want
+to get the same images that I generated below, then checkout the
+appropriate revision *and* use the example from that revision.
+
 ### 1.2.2: Book 1, Chapter 2, Section 2: Creating an Image File
 
 This implementation outputs PNG files rather than PPM files.
@@ -190,7 +195,7 @@ That results in very fuzzy edges unless you bump the number of samples up by man
 This means the simulated camera has roughly (hyper)cubical sensors at each pixel
 but that the pixels are spaced out more on axises where there are fewer pixels per degree of view.
 
-### 1.9.1: Book 1, Chapter 9, Section 1: A Simple Diffuse Material
+### 1.9.7: Book 1, Chapter 9, Section 1: A Simple Diffuse Material
 
 This is essentially the same as image 1.7.1 above except that it uses rays
 bounced off of the object to contribute to the object's color. The objects

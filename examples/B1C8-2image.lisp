@@ -32,8 +32,8 @@ coordinates."
                          :spatial-dimensions spatial-dimensions
                          :color-dimensions color-dimensions)))
 
-    (let* ((world (list (sphere (vec -1 0 0 1/32) 1/2)
-                        (sphere (vec -1 0 -100.5 -1) 100)))
+    (let* ((world (list (sphere (vec 1 0 0 1/32) 1/2 (lambertian (color 1/2 1/2 1/2)))
+                        (sphere (vec 1 0 -100.5 -1) 100 (lambertian (color 1/2 1/2 1/2)))))
            (img (render camera world :samples-per-pixel samples-per-pixel)))
     (write-image #P"B1C8-2image" img
                  :border-width 2

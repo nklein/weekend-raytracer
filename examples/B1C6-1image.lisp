@@ -13,8 +13,8 @@
       ((type sphere sphere)
        (type ray ray)
        (returns vector-component-type))
-    (with-sphere (center radius radius^2) sphere
-      (declare (ignore radius))
+    (with-sphere (center radius radius^2 material) sphere
+      (declare (ignore radius material))
       (with-ray (origin direction) ray
         (let ((oc (v- center origin)))
           (let ((a (vlen^2 direction))
@@ -106,7 +106,9 @@ coordinates."
                                                pixel-delta-v
                                                pixel-delta-w))
                                  2)))
-           (sphere (sphere (vec -1 0 0 1/32) 1/2)))
+           (color-that-is-not-really-used-in-this-render (lambertian (color 1 1 1)))
+           (sphere (sphere (vec -1 0 0 1/32) 1/2
+                           color-that-is-not-really-used-in-this-render)))
       (loop :for z :below depth
             :for du := (v* pixel-delta-w z)
             :for z-loc := (v+ pixel000-loc du)

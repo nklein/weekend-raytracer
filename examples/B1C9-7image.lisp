@@ -30,8 +30,8 @@ The color is based upon the spheres being diffuse gray surfaces."
                          :color-dimensions color-dimensions
                          :max-depth 10)))
 
-    (let* ((world (list (sphere (vec -1 0 0 1/32) 1/2)
-                        (sphere (vec -1 0 -100.5 -1) 100)))
+    (let* ((world (list (sphere (vec -1 0 0 1/32) 1/2 (lambertian (color 1/2 1/2 1/2)))
+                        (sphere (vec -1 0 -100.5 -1) 100 (lambertian (color 1/2 1/2 1/2)))))
            (img (render camera world :samples-per-pixel samples-per-pixel)))
     (write-image #P"B1C9-7image" img
                  :border-width 2

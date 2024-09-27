@@ -80,8 +80,11 @@ coordinates."
                                                pixel-delta-v
                                                pixel-delta-w))
                                  2)))
-           (world (list (sphere (vec -1 0 0 1/32) 1/2)
-                        (sphere (vec -1 0 -100.5 -1) 100))))
+           (color-that-is-not-really-used-in-this-render (lambertian (color 1 1 1)))
+           (world (list (sphere (vec -1 0 0 1/32) 1/2
+                                color-that-is-not-really-used-in-this-render)
+                        (sphere (vec -1 0 -100.5 -1) 100
+                                color-that-is-not-really-used-in-this-render))))
       (loop :for z :below depth
             :for du := (v* pixel-delta-w z)
             :for z-loc := (v+ pixel000-loc du)

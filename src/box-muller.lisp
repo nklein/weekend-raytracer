@@ -28,7 +28,7 @@
 
 (defun reset-box-muller ()
   (or #+bordeaux-threads
-      (bt:with-lock-held (*box-muller-lock*)
+      (progn
         (setf *box-muller-state* nil)
         t)
       (setf *box-muller-state* nil)))
