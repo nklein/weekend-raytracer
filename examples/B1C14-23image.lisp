@@ -43,14 +43,13 @@
           :collect ss))
 
 (defun b1c14-23image (samples-per-pixel &optional verticalp)
-  "This example renders an image cube that is 320x180x5.
+  "This example renders a large image cube of a scene with some
+defined large spheres and some random smaller spheres scattered
+around them.
 
 The optional parameter VERTICALP can be used to have the output image
 oriented so that the depth slices go down the image rather than across
-it.
-
-One of the spheres is lambertian, one metal, one dialectric with
-index of refraction less than that of the air."
+it."
 
   (let* ((aspect-ratios '(1 16/9 64))
          (width 640)

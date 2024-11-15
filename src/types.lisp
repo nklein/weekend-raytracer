@@ -8,6 +8,9 @@
 (setf (documentation 'vector-component-type 'type) "Data type used for components of vectors"
       (documentation 'vector-component-type t)     (documentation 'vector-component-type 'type))
 
+(alexandria:define-constant most-negative-vector-component-type most-negative-double-float)
+(alexandria:define-constant most-positive-vector-component-type most-positive-double-float)
+
 (declaim (inline vector-component))
 (defun vector-component (x)
   "Convert X to the right type for a vector component"

@@ -30,20 +30,22 @@
     (%make-full-hit (vector-component tt) front-face-p point normal material)))
 
 (defstruct (partial-hit (:conc-name %partial-hit-)
-                        (:constructor %make-partial-hit (tt thunk))
+                        (:constructor %make-partial-hit (tt front-face-p thunk))
                         (:include hit))
   (tt (error "Must provide TT") :type vector-component-type :read-only t)
+  (front-face-p (error "Must provide FRONT-FACE") :type boolean :read-only t)
   (thunk (error "Must provide THUNK") :type (function () full-hit) :read-only t)
   (full-hit nil :type (or null full-hit)))
 
 (declaim (inline partial-hit)
-         (type (function (real (function () full-hit)) partial-hit) partial-hit))
-(defun partial-hit (tt thunk)
+         (type (function (real boolean (function () full-hit)) partial-hit) partial-hit))
+(defun partial-hit (tt front-face-p thunk)
   (with-policy-expectations
       ((type real tt)
+       (type boolean front-face-p)
        (type function thunk)
        (returns partial-hit))
-    (%make-partial-hit (vector-component tt) thunk)))
+    (%make-partial-hit (vector-component tt) front-face-p thunk)))
 
 (declaim (inline to-full-hit)
          (type (function (partial-hit) full-hit) to-full-hit))
@@ -55,13 +57,17 @@
         (setf (%partial-hit-full-hit hit)
               (funcall (%partial-hit-thunk hit))))))
 
-(declaim (inline front-face-p)
-         (type (function (full-hit) boolean) front-face-p))
-(defun front-face-p (hit)
-  (with-policy-expectations
-      ((type full-hit hit)
-       (returns boolean))
-    (%full-hit-front-face-p hit)))
+(defgeneric front-face-p (hit)
+  (:method ((hit full-hit))
+    (with-policy-expectations
+        ((type full-hit hit)
+         (returns boolean))
+      (%full-hit-front-face-p hit)))
+  (:method ((hit partial-hit))
+    (with-policy-expectations
+        ((type partial-hit hit)
+         (returns boolean))
+      (%partial-hit-front-face-p hit))))
 
 (declaim (inline point)
          (type (function (full-hit) vec) point))
@@ -98,7 +104,9 @@
     (with-policy-expectations
         ((type partial-hit hit)
          (returns vector-component-type))
-      (%partial-hit-tt hit))))
+      (%partial-hit-tt hit)))
+  (:method ((hit real))
+    hit))
 
 (defgeneric hit (obj ray tinterval)
   (:method ((obj list) ray tinterval)
@@ -114,3 +122,5 @@
             (when hit
               (setf tt (tt hit)
                     ret hit))))))))
+
+(defgeneric hit* (obj ray))

@@ -381,3 +381,18 @@ You can generate this image with the following function:
       (weekend-raytracer/examples:b1c14-23image samples-per-pixel &optional verticalp))
 
 ![Image cube](./images/B1C14-23image.png)
+
+### CSG Intersection
+
+So far, all of the shapes have been spheres.
+The first place that I have branched away from the book is in starting to add CSG
+(Constructive Solid Geometry) objects.
+This image is the intersection of three different spheres: a glass sphere, a
+metalic yellow sphere, and a dull red sphere.
+For context and more views of the CSG object, there are also reflective
+yellow and green spheres nearby.
+
+    (let ((weekend-raytracer:*render-threads* 4))
+      (weekend-raytracer/examples:csg-intersect-image samples-per-pixel &optional verticalp))
+
+![Image cube](./images/CSG-Intersect.png)

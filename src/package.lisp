@@ -41,6 +41,7 @@
            #:at
            #:with-ray)
   (:export #:hit
+           #:hit*
            #:tt
            #:front-face-p
            #:point
@@ -54,6 +55,7 @@
            #:radius
            #:sphere-material
            #:with-sphere)
+  (:export #:csg-intersection)
   (:export #:color
            #:colorp
            #:cref

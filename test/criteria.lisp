@@ -3,6 +3,15 @@
 (in-package #:weekend-raytracer/test)
 
 
+(nst:def-criterion (real= (given &optional (tolerance 1/100000)) (actual))
+  (let ((delta (abs (- actual given))))
+    (cond
+      ((< delta tolerance)
+       (nst:make-success-report))
+      (t
+       (nst:make-failure-report :format "Actual number ~A does not match given ~A"
+                                :args (list actual given))))))
+
 (nst:def-criterion (vec= (given &optional (tolerance 1/100000)) (actual))
   (let ((mag^2 (vlen^2 (v- actual given))))
     (cond

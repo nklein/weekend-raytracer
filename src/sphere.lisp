@@ -75,6 +75,24 @@
              (,material (sphere-material ,ss)))
          ,@body))))
 
+(declaim (inline sphere-intersections)
+         (type (function (vec vector-component-type vec vec) list) sphere-intersections))
+(defun sphere-intersections (center radius^2 origin direction)
+  (with-policy-expectations
+      ((type vector-component-type radius^2)
+       (type vec center origin direction)
+       (returns list))
+    (let ((oc (v- center origin)))
+      (let ((a (vlen^2 direction))
+            (h (v. direction oc))
+            (c (- (vlen^2 oc)
+                  radius^2)))
+        (let ((d (- (* h h)
+                    (* a c))))
+          (unless (minusp d)
+            (let ((sqrtd (the vector-component-type (sqrt d))))
+              (list (/ (- h sqrtd) a) (/ (+ h sqrtd) a)))))))))
+
 (defmethod hit ((obj sphere) ray tinterval)
   (with-policy-expectations
       ((type sphere obj)
@@ -83,30 +101,48 @@
        (returns (or null partial-hit)))
     (with-sphere (center radius radius^2 material) obj
       (with-ray (origin direction) ray
-        (let ((oc (v- center origin)))
-          (let ((a (vlen^2 direction))
-                (h (v. direction oc))
-                (c (- (vlen^2 oc)
-                      radius^2)))
-            (let ((d (- (* h h)
-                        (* a c))))
-              (unless (minusp d)
-                (let ((sqrtd (the vector-component-type (sqrt d))))
-                  (flet ((for-root (tt)
-                           (when (surroundsp tinterval tt)
-                             (flet ((thunk ()
-                                      (let* ((point (at ray tt))
-                                             (normal (v/ (v- point center)
-                                                         radius))
-                                             (front-face-p (minusp (v. direction
-                                                                       normal))))
-                                        (full-hit tt
-                                                  front-face-p
-                                                  point
-                                                  (if front-face-p
-                                                      normal
-                                                      (v* normal #.(vector-component -1)))
-                                                  material))))
-                               (partial-hit tt #'thunk)))))
-                    (or (for-root (/ (- h sqrtd) a))
-                        (for-root (/ (+ h sqrtd) a)))))))))))))
+        (let ((tts (sphere-intersections center radius^2 origin direction)))
+          (when tts
+            (destructuring-bind (t1 t2) tts
+              (flet ((for-root (tt front-face-p)
+                       (when (surroundsp tinterval tt)
+                         (flet ((thunk ()
+                                  (let* ((point (at ray tt))
+                                         (normal (v/ (v- point center)
+                                                     radius)))
+                                    (full-hit tt
+                                              front-face-p
+                                              point
+                                              (if front-face-p
+                                                  normal
+                                                  (v* normal #.(vector-component -1)))
+                                              material))))
+                           (partial-hit tt front-face-p #'thunk)))))
+                (or (for-root t1 t)
+                    (for-root t2 nil))))))))))
+
+(defmethod hit* ((obj sphere) ray)
+  (with-policy-expectations
+      ((type sphere obj)
+       (type ray ray)
+       (returns list))
+    (with-sphere (center radius radius^2 material) obj
+      (with-ray (origin direction) ray
+        (let ((tts (sphere-intersections center radius^2 origin direction)))
+          (when tts
+            (destructuring-bind (t1 t2) tts
+              (flet ((for-root (tt front-face-p)
+                       (flet ((thunk ()
+                                (let* ((point (at ray tt))
+                                       (normal (v/ (v- point center)
+                                                   radius)))
+                                  (full-hit tt
+                                            front-face-p
+                                            point
+                                            (if front-face-p
+                                                normal
+                                                (v* normal #.(vector-component -1)))
+                                            material))))
+                         (partial-hit tt front-face-p #'thunk))))
+                (list (cons (for-root t1 t)
+                            (for-root t2 nil)))))))))))

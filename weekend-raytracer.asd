@@ -4,8 +4,8 @@
   :description "WEEKEND-RAYTRACER is another n-dimensional raytracer."
   :author "Patrick Stein <pat@nklein.com>"
   :license "UNLICENSE"
-  :version "1.0.20240926"
-  :depends-on (#:policy-cond #:zpng #:bordeaux-threads)
+  :version "1.1.20241115"
+  :depends-on (#:policy-cond #:zpng #:bordeaux-threads #:alexandria)
   :in-order-to ((asdf:test-op (asdf:test-op :weekend-raytracer/test)))
   :components
   ((:static-file "README.md")
@@ -58,6 +58,14 @@
                                               "ray"
                                               "color"
                                               "hit"))
+                 (:file "csg-intersect" :depends-on ("package"
+                                                     "compile"
+                                                     "types"
+                                                     "interval"
+                                                     "vector"
+                                                     "ray"
+                                                     "color"
+                                                     "hit"))
                  (:file "camera" :depends-on ("package"
                                               "compile"
                                               "types"
@@ -75,8 +83,8 @@
   :description "Examples for the WEEKEND-RAYTRACER package."
   :author "Patrick Stein <pat@nklein.com>"
   :license "UNLICENSE"
-  :version "1.0.20240926"
-  :depends-on ((:version #:weekend-raytracer "1.0.20240926"))
+  :version "1.1.20241115"
+  :depends-on ((:version #:weekend-raytracer "1.1.20241115"))
   :in-order-to ((asdf:test-op (asdf:test-op :weekend-raytracer/test)))
   :components
   ((:static-file "README.md")
@@ -102,14 +110,15 @@
                  (:file "B1C12-20image" :depends-on ("package"))
                  (:file "B1C12-21image" :depends-on ("package"))
                  (:file "B1C13-22image" :depends-on ("package"))
-                 (:file "B1C14-23image" :depends-on ("package"))))))
+                 (:file "B1C14-23image" :depends-on ("package"))
+                 (:file "CSG-Intersect" :depends-on ("package"))))))
 
 (asdf:defsystem #:weekend-raytracer/test
   :description "Tests for the WEEKEND-RAYTRACER package."
   :author "Patrick Stein <pat@nklein.com>"
   :license "UNLICENSE"
-  :version "1.0.20240926"
-  :depends-on ((:version #:weekend-raytracer "1.0.20240926") #:nst)
+  :version "1.1.20241115"
+  :depends-on ((:version #:weekend-raytracer "1.1.20241115") #:nst)
   :perform (asdf:test-op (o c)
                          (uiop:symbol-call :weekend-raytracer/test :run-all-tests))
   :components
@@ -133,6 +142,9 @@
                  (:file "sphere" :depends-on ("package"
                                               "criteria"
                                               "fixtures"))
+                 (:file "csg-intersect" :depends-on ("package"
+                                                     "criteria"
+                                                     "fixtures"))
                  (:file "camera" :depends-on ("package"))
                  (:file "output" :depends-on ("package"))
                  (:file "run" :depends-on ("package"))))))
