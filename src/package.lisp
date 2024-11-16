@@ -5,6 +5,8 @@
   (:export #:set-optimization-level
            #:with-policy-expectations)
   (:export #:vector-component-type
+           #:most-negative-vector-component-type
+           #:most-positive-vector-component-type
            #:vector-component
            #:color-component-type
            #:color-component)
@@ -56,6 +58,7 @@
            #:sphere-material
            #:with-sphere)
   (:export #:csg-intersection)
+  (:export #:csg-complement)
   (:export #:color
            #:colorp
            #:cref

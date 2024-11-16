@@ -396,3 +396,12 @@ yellow and green spheres nearby.
       (weekend-raytracer/examples:csg-intersect-image samples-per-pixel &optional verticalp))
 
 ![Image cube](./images/CSG-Intersect.png)
+
+### CSG Complement
+
+This image is the intersection of glass sphere and the complement of a red sphere.
+
+    (let ((weekend-raytracer:*render-threads* 4))
+      (weekend-raytracer/examples:csg-complement-image samples-per-pixel &optional verticalp))
+
+![Image cube](./images/CSG-Complement.png)
