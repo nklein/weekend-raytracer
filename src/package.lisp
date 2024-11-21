@@ -59,6 +59,7 @@
            #:with-sphere)
   (:export #:csg-intersection)
   (:export #:csg-complement)
+  (:export #:csg-union)
   (:export #:color
            #:colorp
            #:cref

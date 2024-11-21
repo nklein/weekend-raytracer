@@ -23,4 +23,5 @@
   (:export #:b1c13-22image)
   (:export #:b1c14-23image)
   (:export #:csg-intersect-image)
-  (:export #:csg-complement-image))
+  (:export #:csg-complement-image)
+  (:export #:csg-union-image))

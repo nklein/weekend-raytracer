@@ -405,3 +405,15 @@ This image is the intersection of glass sphere and the complement of a red spher
       (weekend-raytracer/examples:csg-complement-image samples-per-pixel &optional verticalp))
 
 ![Image cube](./images/CSG-Complement.png)
+
+### CSG Union
+
+This image is the union of three different spheres: a glass sphere, a
+metalic yellow sphere, and a dull red sphere.
+For context and more views of the CSG object, there are also reflective
+yellow and green spheres nearby.
+
+    (let ((weekend-raytracer:*render-threads* 4))
+      (weekend-raytracer/examples:csg-union-image samples-per-pixel &optional verticalp))
+
+![Image cube](./images/CSG-Union.png)
