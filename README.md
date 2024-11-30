@@ -417,3 +417,10 @@ yellow and green spheres nearby.
       (weekend-raytracer/examples:csg-union-image samples-per-pixel &optional verticalp))
 
 ![Image cube](./images/CSG-Union.png)
+
+Or, a 5d version of pretty much the same scene:
+
+    (let ((weekend-raytracer:*render-threads* 4))
+      (weekend-raytracer/examples:csg-union-image-5d samples-per-pixel))
+
+![Image cube](./images/CSG-Union-5d.png)
