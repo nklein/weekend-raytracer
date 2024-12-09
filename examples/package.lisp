@@ -25,4 +25,5 @@
   (:export #:csg-intersect-image)
   (:export #:csg-complement-image)
   (:export #:csg-union-image
-           #:csg-union-image-5d))
+           #:csg-union-image-5d)
+  (:export #:halfspace-image))

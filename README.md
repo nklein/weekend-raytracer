@@ -424,3 +424,12 @@ Or, a 5d version of pretty much the same scene:
       (weekend-raytracer/examples:csg-union-image-5d samples-per-pixel))
 
 ![Image cube](./images/CSG-Union-5d.png)
+
+### Halfspaces
+
+This image is a 4D cube created as the intersection of eight halfspaces.
+
+    (let ((weekend-raytracer:*render-threads* 4))
+      (weekend-raytracer/examples:halfspace-image samples-per-pixel &optional verticalp))
+
+![Image cube](./images/Halfspace.png)

@@ -4,7 +4,7 @@
   :description "WEEKEND-RAYTRACER is another n-dimensional raytracer."
   :author "Patrick Stein <pat@nklein.com>"
   :license "UNLICENSE"
-  :version "1.3.20241121"
+  :version "1.4.20241209"
   :depends-on (#:policy-cond #:zpng #:bordeaux-threads #:alexandria)
   :in-order-to ((asdf:test-op (asdf:test-op :weekend-raytracer/test)))
   :components
@@ -58,6 +58,14 @@
                                               "ray"
                                               "color"
                                               "hit"))
+                 (:file "halfspace" :depends-on ("package"
+                                                 "compile"
+                                                 "types"
+                                                 "interval"
+                                                 "vector"
+                                                 "ray"
+                                                 "color"
+                                                 "hit"))
                  (:file "csg-intersect" :depends-on ("package"
                                                      "compile"
                                                      "types"
@@ -99,8 +107,8 @@
   :description "Examples for the WEEKEND-RAYTRACER package."
   :author "Patrick Stein <pat@nklein.com>"
   :license "UNLICENSE"
-  :version "1.3.20241121"
-  :depends-on ((:version #:weekend-raytracer "1.3.20241121"))
+  :version "1.4.20241209"
+  :depends-on ((:version #:weekend-raytracer "1.4.20241209"))
   :in-order-to ((asdf:test-op (asdf:test-op :weekend-raytracer/test)))
   :components
   ((:static-file "README.md")
@@ -129,14 +137,15 @@
                  (:file "B1C14-23image" :depends-on ("package"))
                  (:file "CSG-Intersect" :depends-on ("package"))
                  (:file "CSG-Complement" :depends-on ("package"))
-                 (:file "CSG-Union" :depends-on ("package"))))))
+                 (:file "CSG-Union" :depends-on ("package"))
+                 (:file "Halfspace" :depends-on ("package"))))))
 
 (asdf:defsystem #:weekend-raytracer/test
   :description "Tests for the WEEKEND-RAYTRACER package."
   :author "Patrick Stein <pat@nklein.com>"
   :license "UNLICENSE"
-  :version "1.3.20241121"
-  :depends-on ((:version #:weekend-raytracer "1.3.20241121") #:nst)
+  :version "1.4.20241209"
+  :depends-on ((:version #:weekend-raytracer "1.4.20241209") #:nst)
   :perform (asdf:test-op (o c)
                          (uiop:symbol-call :weekend-raytracer/test :run-all-tests))
   :components
@@ -160,6 +169,9 @@
                  (:file "sphere" :depends-on ("package"
                                               "criteria"
                                               "fixtures"))
+                 (:file "halfspace" :depends-on ("package"
+                                                 "criteria"
+                                                 "fixtures"))
                  (:file "csg-intersect" :depends-on ("package"
                                                      "criteria"
                                                      "fixtures"))

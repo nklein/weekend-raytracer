@@ -57,6 +57,11 @@
            #:radius
            #:sphere-material
            #:with-sphere)
+  (:export #:halfspace
+           #:halfspace-normal
+           #:halfspace-offset
+           #:halfspace-material
+           #:with-halfspace)
   (:export #:csg-intersection)
   (:export #:csg-complement)
   (:export #:csg-union)
