@@ -35,32 +35,55 @@
         (values (coerce (nreverse width) 'index-vector)
                 (coerce (nreverse height) 'index-vector))))))
 
-(defun %border-count (ws)
+(defun %make-border-p-array (ws border-width)
   (with-policy-expectations
       ((type index-vector ws)
-       (returns fixnum))
-    (flet ((product (l)
-             (with-policy-expectations
-                 ((type list l)
-                  (returns fixnum))
-               (reduce #'* l))))
-      (reduce #'+ (maplist #'product (coerce ws 'list))
-              :key #'1-))))
+       (type fixnum border-width)
+       (returns (array boolean (*))))
+    (labels ((list-of (nn vv)
+               (loop :repeat nn :collecting vv))
+             (rec (ws accum bw)
+               (cond
+                 (ws
+                  (destructuring-bind (w &rest ws) ws
+                    (rec ws
+                         (loop :with border := (list-of bw t)
+                               :for ii :below w
+                               :when (plusp ii)
+                                 :appending border
+                               :appending accum)
+                         (* bw 2))))
+                 ((null ws)
+                  accum))))
+      (make-array (%calculate-one-output-size ws border-width)
+                  :element-type 'boolean
+                  :initial-contents (rec (rest ws)
+                                         (list-of (first ws) nil)
+                                         border-width)))))
+
+(defun %border-p (xx border-p-array)
+  (with-policy-expectations
+      ((type fixnum xx)
+       (type (array boolean (*)) border-p-array)
+       (returns boolean))
+    (aref border-p-array xx)))
 
 (defun %calculate-one-output-size (ws border-width)
   (with-policy-expectations
       ((type index-vector ws)
        (type fixnum border-width)
        (returns fixnum))
-    (let ((borderless-size (reduce #'* ws :initial-value 1))
-          (border-count (if (and ws (plusp (length ws)))
-                            (%border-count (subseq ws 1))
-                            0)))
-      (with-policy-expectations
-          ((type fixnum borderless-size border-count))
-        (+ borderless-size
-           (* border-count
-              border-width))))))
+    (labels ((rec (ws accum bw)
+               (cond
+                 ((null ws)
+                  accum)
+                 (t
+                  (destructuring-bind (w &rest ws) ws
+                    (rec ws
+                         (- (* w (+ accum bw))
+                            bw)
+                         (* bw 2)))))))
+      (rec (rest ws) (first ws) border-width))))
 
 (defun %calculate-output-size (dimensions border-width permutation cutoff)
   (with-policy-expectations
@@ -76,12 +99,6 @@
                   ((returns fixnum))
                 (or (%calculate-one-output-size heights border-width)
                     1))))))
-
-(defun %border-p (xs ws)
-  (with-policy-expectations
-      ((type index-vector xs ws)
-       (returns boolean))
-    (not (every #'< xs ws))))
 
 (defun %increment (xs ws border-width)
   (with-policy-expectations
@@ -122,13 +139,19 @@
        (type boolean verbose)
        (assertion (%valid-permutation-p permutation (1+ (length dimensions)))))
     (multiple-value-bind (widths heights) (%collect-width-and-height-components dimensions permutation cutoff)
-      (let ((pixel-indexes (mapcar (constantly 0) (list* 1 (coerce dimensions 'list)))))
+      (let ((pixel-indexes (mapcar (constantly 0) (list* 1 (coerce dimensions 'list))))
+            (border-p-ys (%make-border-p-array heights border-width))
+            (border-p-xs (%make-border-p-array widths border-width)))
         (with-policy-expectations
             ((type list pixel-indexes))
-          (flet ((map-indexes (is offset)
-                   (loop :for i :across is
-                         :for k :from offset
-                         :do (setf (elt pixel-indexes (elt permutation k)) i)))
+          (flet ((make-permuted-vector (orig into)
+                   (loop :for i :below (length permutation)
+                         :do (setf (elt into i) (elt orig (elt permutation i)))
+                         :finally (return into)))
+                 (make-unpermuted-vector (orig into)
+                   (loop :for i :below (length permutation)
+                         :do (setf (elt into (elt permutation i)) (elt orig i))
+                         :finally (return into)))
                  (output-border-pixel ()
                    (funcall output-pixel-fn border-color))
                  (output-pixel ()
@@ -136,28 +159,27 @@
                                                   :collecting (progn
                                                                 (setf (elt pixel-indexes (length dimensions)) k)
                                                                 (apply #'aref array pixel-indexes))))))
-            (loop :with ys := (map 'vector (constantly 0) heights)
+            (loop :with pp := (map 'list (constantly 0) dimensions)
+                  :with maxes := (reverse (make-permuted-vector (map 'list #'identity dimensions)
+                                                                (map 'list #'identity dimensions)))
                   :for y :below height
-                  :for border-row-p := (%border-p ys heights)
+                  :for border-row-p := (%border-p y border-p-ys)
                   :do (when verbose
                         (format *debug-io* "Scanline ~D of ~D~C" (1+ y) height #\Return))
                   :finally (when verbose
                              (format *debug-io* "Done====================================~%"))
-                  :do (unless border-row-p
-                        (map-indexes ys (length widths)))
                   :do (unwind-protect
                            (loop :with xs := (map 'vector (constantly 0) widths)
                                  :for x :below width
                                  :for border-column-p := (or border-row-p
-                                                             (%border-p xs widths))
-                                 :do (unless border-column-p
-                                       (map-indexes xs 0))
+                                                             (%border-p x border-p-xs))
                                  :do (unwind-protect
                                           (if border-column-p
                                               (output-border-pixel)
-                                              (output-pixel))
-                                       (%increment xs widths border-width)))
-                        (%increment ys heights border-width)))))))))
+                                              (progn
+                                                (make-unpermuted-vector (reverse pp) pixel-indexes)
+                                                (output-pixel)
+                                                (increment-indexes pp maxes)))))))))))))
 
 (defun %write-png-image (array filename
                          &key

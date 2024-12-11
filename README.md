@@ -433,3 +433,18 @@ This image is a 4D cube created as the intersection of eight halfspaces.
       (weekend-raytracer/examples:halfspace-image samples-per-pixel &optional verticalp))
 
 ![Image cube](./images/Halfspace.png)
+
+### E8
+
+This image doesn't use any new functionality.
+
+The [E8 Lattice](https://en.wikipedia.org/wiki/E8_lattice) is an infinite
+field of points in eight-dimensional space.
+It is the most efficient packing of eight-dimensional spheres.
+Every sphere in this lattice touches 240 other spheres.
+
+This image is a view from the origin of the spheres which touch
+the sphere at the origin in the E8 packing.
+The spheres are reflective and randomly colored.
+
+![E8 Kissing Spheres](./images/E8.png)
