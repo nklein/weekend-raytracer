@@ -448,3 +448,9 @@ the sphere at the origin in the E8 packing.
 The spheres are reflective and randomly colored.
 
 ![E8 Kissing Spheres](./images/E8.png)
+
+### Sn
+
+Very simple rendering of S^n.
+
+![S^3](./images/Sn-3.png)

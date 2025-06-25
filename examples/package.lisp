@@ -26,4 +26,5 @@
   (:export #:csg-complement-image)
   (:export #:csg-union-image
            #:csg-union-image-5d)
-  (:export #:halfspace-image))
+  (:export #:halfspace-image)
+  (:export #:sn-image))
