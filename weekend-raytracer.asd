@@ -141,7 +141,8 @@
                  (:file "Halfspace" :depends-on ("package"))
                  (:file "E8" :depends-on ("package"))
                  (:file "Sn" :depends-on ("package"))
-                 (:file "Kiss3" :depends-on ("package"))))))
+                 (:file "Kiss3" :depends-on ("package"))
+                 (:file "Kiss4" :depends-on ("package"))))))
 
 (asdf:defsystem #:weekend-raytracer/test
   :description "Tests for the WEEKEND-RAYTRACER package."

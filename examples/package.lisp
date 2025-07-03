@@ -28,4 +28,5 @@
            #:csg-union-image-5d)
   (:export #:halfspace-image)
   (:export #:sn-image)
-  (:export #:kiss3-image))
+  (:export #:kiss3-image)
+  (:export #:kiss4-image))

@@ -1,4 +1,4 @@
-;;;; examples/Sn.lisp
+;;;; examples/Kiss3.lisp
 
 (in-package #:weekend-raytracer/examples)
 

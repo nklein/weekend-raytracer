@@ -455,8 +455,10 @@ Very simple rendering of S^n.
 
 ![S^3](./images/Sn-3.png)
 
-### Kissing in 3D
+### Kissing in 3D and 4D
 
 Here is very simple rendering of twelve 3-balls kissing a central 3-ball.
 
 ![3D Kissing](./images/Kiss3.png)
+
+![4D Kissing](./images/Kiss4.png)
