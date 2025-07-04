@@ -28,13 +28,18 @@
                          :focal-length (vlen center)
                          :focus-angle 0.6
                          :max-depth 20))
-         (phi (/ (1+ (sqrt 5.0d0)) 2)))
-    (flet ((kisser (x y z)
-             (sphere (vec x y z)
-                     1
-                     (metal (color 3/4 3/4 4/4) 0.8))))
+         (phi (/ (1+ (sqrt 5.0d0)) 2))
+         (scale (/ 2 (vlen (vec phi 1)))))
+    (labels ((random-albedo ()
+               (apply #'color (loop :repeat 3
+                                    :collect (* (random 1.0d0)
+                                                (random 1.0d0)))))
+             (kisser (x y z)
+               (sphere (v* (vec x y z) scale)
+                       1
+                       (metal (random-albedo) 0.8))))
 
-      (let* ((world (list (sphere origin 1 (lambertian (color 3/4 3/4 0/4)))
+      (let* ((world (list (sphere origin 1 (metal (color 1 1 1) 0))
                           (kisser phi 1 0)
                           (kisser phi -1 0)
                           (kisser (- phi) 1 0)
