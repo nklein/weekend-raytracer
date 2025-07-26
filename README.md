@@ -454,6 +454,7 @@ The spheres are reflective and randomly colored.
 Very simple rendering of S^n.
 
 ![S^3](./images/Sn-3.png)
+![S^4](./images/Sn-4.png)
 
 ### Kissing in 3D and 4D
 
